@@ -1,6 +1,9 @@
 // 변경할 때마다 index.html의 APP_VERSION과 같은 값으로 올린다.
-const VERSION = '0.1.1';
-const CACHE = `app-${VERSION}`;
+const VERSION = '0.1.0';
+
+// 같은 주소(github.io) 아래 앱들이 캐시 저장소를 함께 쓰므로, 앱 경로를 캐시 이름 앞에 붙여 구분한다.
+const APP_SCOPE = new URL(self.registration.scope).pathname; // 예: /apps/gugudan/
+const CACHE = `${APP_SCOPE}${VERSION}`;
 
 // 오프라인용으로 미리 저장할 파일. 새 파일을 추가하면 여기에도 넣는다.
 const ASSETS = [
@@ -20,7 +23,9 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(
+        keys.filter((k) => k.startsWith(APP_SCOPE) && k !== CACHE).map((k) => caches.delete(k))
+      ))
       .then(() => self.clients.claim())
   );
 });
@@ -38,11 +43,11 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE).then((c) => c.put('./index.html', copy));
           return res;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => caches.match('./index.html', { cacheName: CACHE }))
     );
     return;
   }
 
   // 나머지는 저장본 우선
-  event.respondWith(caches.match(req).then((hit) => hit || fetch(req)));
+  event.respondWith(caches.match(req, { cacheName: CACHE }).then((hit) => hit || fetch(req)));
 });

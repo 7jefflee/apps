@@ -1,6 +1,6 @@
 {
-  "name": "새 웹앱",
-  "short_name": "새 웹앱",
+  "name": "__APP_NAME__",
+  "short_name": "__APP_NAME__",
   "description": "Claude로 만든 폰용 웹앱",
   "lang": "ko",
   "id": "./",

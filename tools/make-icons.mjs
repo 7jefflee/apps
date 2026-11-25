@@ -1,5 +1,5 @@
-// icon.svg → icon-192.png, icon-512.png
-// 사용: node tools/make-icons.mjs
+// <앱>/icon.svg → <앱>/icon-192.png, <앱>/icon-512.png
+// 사용: node tools/make-icons.mjs <app-id>
 // Playwright(클라우드 환경에 기본 설치)가 있으면 SVG를 그대로 렌더링하고,
 // 없으면 SVG의 첫 두 fill 색으로 "배경 + 원" 아이콘을 만든다.
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -8,7 +8,9 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { deflateSync } from 'node:zlib';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const appId = process.argv[2];
+if (!appId) { console.error('사용: node tools/make-icons.mjs <app-id>'); process.exit(1); }
+const root = join(dirname(fileURLToPath(import.meta.url)), '..', appId);
 const svg = readFileSync(join(root, 'icon.svg'), 'utf8');
 const SIZES = [192, 512];
 

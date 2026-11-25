@@ -1,13 +1,14 @@
-# 폰용 웹앱(PWA) 저장소
+# 폰용 웹앱(PWA) 모음 저장소
 
-이 저장소는 GitHub Pages로 배포되는 단일 파일 PWA다. 앱을 만들거나 고치는 지시는 모두 `.claude/skills/pwa-app` 스킬 절차를 따른다.
+앱 하나 = 최상위 폴더 하나. GitHub Pages로 `https://<owner>.github.io/<repo>/<app-id>/`에 배포된다. 앱을 만들거나 고치는 지시는 모두 `.claude/skills/pwa-app` 스킬 절차를 따른다.
 
 ## 사용자
 - 폰의 Claude 앱(Code 탭)에서 지시한다. 화면이 작으니 **한국어로, 짧게, 결론부터** 답한다.
 - 테스트는 갤럭시 S23 울트라에서 배포된 주소를 열어서 한다.
 
 ## 원칙
+- 새 앱은 `node tools/new-app.mjs`로 만든다(폴더를 손으로 복사하지 않는다).
 - 작업이 끝나면 테스트(`node --test tests/*.test.js`) 통과 후 커밋·push까지 한다. 사용자가 "올리지 마"라고 하면 push 생략.
 - 테스트가 통과하지 않은 상태로 push하지 않는다. 막히면 시도한 것과 막힌 지점을 보고한다.
-- `APP_VERSION`(index.html)과 `VERSION`(sw.js)은 항상 같이 올린다.
-- PR은 만들지 않는다(사용자가 요청할 때만).
+- 앱의 `APP_VERSION`(index.html)과 `VERSION`(sw.js)은 항상 같이 올린다.
+- 지시받은 앱 폴더만 고친다. PR은 만들지 않는다(사용자가 요청할 때만).
