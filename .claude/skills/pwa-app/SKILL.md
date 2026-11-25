@@ -40,6 +40,8 @@ description: 이 저장소에서 폰용 웹앱(PWA)을 새로 만들거나 고�
 5. 커밋하고 push한다.
    - 먼저 `git push origin HEAD:main` 시도.
    - 거부되면 현재 브랜치(`claude/...`)에 push한다. workflow가 테스트 후 main에 자동 병합하고 배포한다. **PR은 만들지 않는다.**
+   - 예외: `.github/workflows/`를 고친 커밋은 자동 병합이 거부된다(GitHub 권한 제한). 이때만 PR을 만들고 사용자에게 "GitHub 앱에서 Merge" 요청.
+   - push 후 접속 주소를 열어 `APP_VERSION`이 새 값인지 확인할 수 있으면 확인한다(1~2분 걸림).
 
 ## 5. 마지막 답변 (짧게, 결론부터)
 - 접속 주소: `https://<owner>.github.io/<repo>/` (`git remote get-url origin`에서 owner/repo를 읽는다)
