@@ -1,5 +1,5 @@
 // 변경할 때마다 index.html의 APP_VERSION과 같은 값으로 올린다.
-const VERSION = '0.1.0';
+const VERSION = '0.1.1';
 const CACHE = `app-${VERSION}`;
 
 // 오프라인용으로 미리 저장할 파일. 새 파일을 추가하면 여기에도 넣는다.
