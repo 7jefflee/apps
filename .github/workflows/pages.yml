@@ -48,8 +48,19 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run pages.yml --ref main --repo "${GITHUB_REPOSITORY}"
 
-  deploy:
+  build:
     needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: .
+
+  deploy:
+    needs: build
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     concurrency:
@@ -59,10 +70,5 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/configure-pages@v6
-      - uses: actions/upload-pages-artifact@v5
-        with:
-          path: .
       - id: deploy
         uses: actions/deploy-pages@v5
