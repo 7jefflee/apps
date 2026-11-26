@@ -3,5 +3,10 @@
     "id": "hello",
     "name": "안녕 샘플",
     "description": "구조 확인용 샘플 앱"
+  },
+  {
+    "id": "history-quest",
+    "name": "역사 퀘스트",
+    "description": "중2 역사 기말 대비 — 플래시카드·퀴즈·연표 게임"
   }
 ]
