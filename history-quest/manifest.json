@@ -1,15 +1,15 @@
 {
   "name": "역사 퀘스트",
   "short_name": "역사 퀘스트",
-  "description": "중2 역사 기말 대비 — 플래시카드·퀴즈·연표 게임",
+  "description": "중2 역사 전 단원 학습 게임 (프로미스나인 포카 모으기)",
   "lang": "ko",
   "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#eef8f9",
-  "theme_color": "#0e7c86",
+  "background_color": "#fdf2f8",
+  "theme_color": "#f7d6e8",
   "icons": [
     {
       "src": "./icon-192.png",
