@@ -167,3 +167,10 @@ test('내 사진 포카: 사진이 있으면 사진으로, 안 뽑은 카드는 
   assert.match(locked, /사진 대기 중/);
   assert.doesNotMatch(svg('hy-1', false, 'javascript:alert(1)'), /<image/);
 });
+
+test('관리자 비밀번호', () => {
+  const check = app('checkPin');
+  assert.equal(check('5258'), true);
+  assert.equal(check('1234'), false);
+  assert.equal(check(''), false);
+});
