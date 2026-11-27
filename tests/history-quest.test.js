@@ -155,3 +155,15 @@ test('저장 데이터 복구·v1.0 기록 이전', () => {
   assert.equal(json(s.owned), json(['ng-0']));
   assert.equal(json(s.cleared), json(['Ⅲ-2']));
 });
+
+test('내 사진 포카: 사진이 있으면 사진으로, 안 뽑은 카드는 사진을 숨김', () => {
+  const svg = app('photocardSVG');
+  const withPhoto = svg('hy-1', false, 'blob:https://x/abc');
+  assert.match(withPhoto, /<image href="blob:https:\/\/x\/abc"/);
+  assert.match(withPhoto, /송하영/);
+  assert.equal((withPhoto.match(/<\/svg>/g) || []).length, 1);
+  const locked = svg('hy-1', true, 'blob:https://x/abc');
+  assert.doesNotMatch(locked, /<image/);
+  assert.match(locked, /사진 대기 중/);
+  assert.doesNotMatch(svg('hy-1', false, 'javascript:alert(1)'), /<image/);
+});

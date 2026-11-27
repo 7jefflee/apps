@@ -180,6 +180,8 @@
     .reveal svg { width: 100%; height: auto; display: block; border-radius: 14px; box-shadow: 0 10px 30px rgba(214,51,122,.35); }
     .reveal.spin { animation: pop .9s ease-out; }
     @keyframes pop { 0% { transform: rotateY(540deg) scale(.4); opacity: 0 } 70% { transform: rotateY(0) scale(1.06); opacity: 1 } 100% { transform: scale(1) } }
+    .filebtn { display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 16px; background: var(--mem); color: #fff; font-weight: 800; cursor: pointer; }
+    .bcards button { position: relative; }
     .toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(30px); opacity: 0;
              background: #3b2a4a; color: #fff; padding: 12px 20px; border-radius: 99px; font-weight: 800; z-index: 30; transition: all .3s; max-width: 90vw; text-align: center; pointer-events: none; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -260,7 +262,7 @@
           <button class="small white" id="soundBtn">🔊 효과음 켜짐</button>
           <button class="small white" id="swapBtn">🔄 카드 앞면: 설명</button>
         </div>
-        <p class="foot">⭐ 10개 = 포카 뽑기권 1장 · 중단원 80% 마스터하면 뽑기권 보너스! · <span id="version"></span></p>
+        <p class="foot">📒 바인더에서 카드를 누르면 내 사진을 넣을 수 있어요 · ⭐ 10개 = 포카 뽑기권 1장 · 중단원 80% 마스터하면 뽑기권 보너스! · <span id="version"></span></p>
       </div>
     </div>
   </section>
@@ -374,12 +376,21 @@
     <div class="row"><button id="drawAgain">한 장 더!</button><button class="ghost" id="drawClose">닫기</button></div>
   </div>
 </div>
+<div class="modal" id="photoModal" hidden>
+  <div class="box">
+    <h2 id="photoTitle">📷 포카 사진 넣기</h2>
+    <div class="reveal" id="photoCard"></div>
+    <p class="sub" id="photoText"></p>
+    <label class="filebtn"><input type="file" accept="image/*" id="photoInput" hidden><span>📷 갤러리에서 사진 고르기</span></label>
+    <div class="row"><button class="ghost" id="photoDel">🗑 사진 빼기</button><button class="ghost" id="photoClose">닫기</button></div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <button id="install" hidden style="position:fixed;right:16px;bottom:max(16px,env(safe-area-inset-bottom));z-index:15">📲 설치</button>
 
 <script>
 const APP_NAME = '역사 퀘스트';
-const APP_VERSION = '2.0.0';
+const APP_VERSION = '2.1.0';
 const STORE_KEY = 'history-quest:v1';
 
 // ── 프로미스나인 (2025년 이후 5인: ASND) ──
@@ -1588,21 +1599,35 @@ function loadState(raw) {
   }
 }
 
-// 포카 그림 (SVG, 사진 없이 그린 팬아트 카드)
+// 포카 그림 (SVG). photo: 주하가 기기에서 넣은 사진 주소(blob:)가 있으면 사진 포카로
 let svgSeq = 0;
-function photocardSVG(key, locked) {
+function photocardSVG(key, locked, photo) {
   const gid = `g${key}-${++svgSeq}`;
+  if (photo && !/^(blob:|data:image\/)/.test(photo)) photo = null;
   const [mid, si] = key.split('-');
   const m = MEMBERS.find((x) => x[0] === mid);
   const [set, icon] = SETS[+si];
   const c = locked ? '#d9cfe0' : m[3];
   const no = String(ALL_PHOTOCARDS.indexOf(key) + 1).padStart(2, '0');
   const sparkle = (x, y, r) => `<path d="M${x} ${y - r} L${x + r * 0.3} ${y - r * 0.3} L${x + r} ${y} L${x + r * 0.3} ${y + r * 0.3} L${x} ${y + r} L${x - r * 0.3} ${y + r * 0.3} L${x - r} ${y} L${x - r * 0.3} ${y - r * 0.3}Z" fill="#fff" opacity=".9"/>`;
+  if (!locked && photo) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
+  <rect width="200" height="300" rx="16" fill="${c}"/>
+  <clipPath id="c${gid}"><rect x="8" y="8" width="184" height="284" rx="12"/></clipPath>
+  <image href="${photo}" x="8" y="8" width="184" height="284" preserveAspectRatio="xMidYMid slice" clip-path="url(#c${gid})"/>
+  <rect x="8" y="232" width="184" height="60" fill="${c}" opacity=".88" clip-path="url(#c${gid})"/>
+  <rect x="8" y="8" width="184" height="284" rx="12" fill="none" stroke="#fff" stroke-width="4"/>
+  <text x="100" y="32" text-anchor="middle" font-size="14" font-weight="900" fill="#fff" stroke="${c}" stroke-width="4" paint-order="stroke">${icon} ${set}</text>
+  <text x="100" y="260" text-anchor="middle" font-size="19" font-weight="900" fill="#fff">♡ ${m[1]} ♡</text>
+  <text x="100" y="281" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" opacity=".9">fromis_9 · No.${no}</text>
+</svg>`;
+  }
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
   <defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="${locked ? '#efe9f3' : '#fff0f7'}"/></linearGradient></defs>
   <rect width="200" height="300" rx="16" fill="url(#${gid})"/>
   <rect x="8" y="8" width="184" height="284" rx="12" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="${locked ? '6 6' : '0'}"/>
   ${locked ? `<text x="100" y="170" text-anchor="middle" font-size="90" font-weight="900" fill="#fff">?</text>
+  ${photo ? `<text x="100" y="215" text-anchor="middle" font-size="15" font-weight="800" fill="#8a7397">📷 사진 대기 중</text>` : ''}
   <text x="100" y="262" text-anchor="middle" font-size="15" font-weight="800" fill="#a493b3">${set}</text>` : `
   <circle cx="100" cy="128" r="62" fill="#fff" opacity=".35"/>
   ${sparkle(40, 60, 12)}${sparkle(162, 92, 9)}${sparkle(150, 200, 7)}${sparkle(46, 190, 8)}
@@ -1699,7 +1724,7 @@ function main() {
     for (const m of MEMBERS) {
       const b = document.createElement('button');
       b.className = 'bias-btn' + (state.bias === m[0] ? ' on' : '');
-      b.innerHTML = photocardSVG(`${m[0]}-0`, false) + `<b>${m[1]}</b>`;
+      b.innerHTML = photocardSVG(`${m[0]}-0`, false, photos.get(`${m[0]}-0`)) + `<b>${m[1]}</b>`;
       b.addEventListener('click', () => {
         state.bias = m[0]; save(); applyTheme();
         toast(`💖 최애: ${m[2]}! 같이 역사 공부해요`);
@@ -1714,7 +1739,9 @@ function main() {
   // 홈
   function renderHome() {
     const m = bias();
-    $('heroCard').innerHTML = photocardSVG(state.owned.find((k) => k.startsWith(m[0] + '-')) || `${m[0]}-0`, false);
+    const mine = state.owned.filter((k) => k.startsWith(m[0] + '-'));
+    const heroKey = mine.find((k) => photos.has(k)) || mine[0] || `${m[0]}-0`;
+    $('heroCard').innerHTML = photocardSVG(heroKey, false, mine.includes(heroKey) ? photos.get(heroKey) : null);
     $('heroBias').textContent = `💖 최애 ${m[2]} · 포카 ${state.owned.filter((k) => k.startsWith(m[0] + '-')).length}/${SETS.length}`;
     $('heroSub').textContent = `플로버 주하의 중2 역사 정복기`;
     $('starText').textContent = `⭐ ${state.stars} / ${STARS_PER_TICKET}`;
@@ -2036,7 +2063,7 @@ function main() {
     const m = MEMBERS.find((x) => x[0] === key.split('-')[0]);
     const el = $('drawCard');
     el.classList.remove('spin'); void el.offsetWidth;
-    el.innerHTML = photocardSVG(key, false);
+    el.innerHTML = photocardSVG(key, false, photos.get(key));
     el.classList.add('spin');
     $('drawTitle').textContent = key.startsWith(bias()[0] + '-') ? '💖 최애 포카 획득! 💖' : '✨ 새 포카 획득! ✨';
     $('drawText').textContent = `${m[1]} · ${SETS[+key.split('-')[1]][0]} (${state.owned.length}/${ALL_PHOTOCARDS.length})`;
@@ -2063,15 +2090,97 @@ function main() {
       SETS.forEach((s, i) => {
         const key = `${m[0]}-${i}`;
         const b = document.createElement('button');
-        b.innerHTML = photocardSVG(key, !state.owned.includes(key));
+        b.innerHTML = photocardSVG(key, !state.owned.includes(key), photos.get(key));
+        b.addEventListener('click', () => openPhoto(key));
         cs.appendChild(b);
       });
       box.appendChild(row);
     }
   }
 
+  // ── 내 사진 포카 (기기 안 IndexedDB에만 저장, 어디에도 올리지 않음) ──
+  const photos = new Map(); // 포카 key → blob: 주소
+  function db() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('history-quest', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('photos');
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+  }
+  async function dbDo(mode, fn) {
+    const d = await db();
+    return new Promise((res, rej) => {
+      const tx = d.transaction('photos', mode);
+      const out = fn(tx.objectStore('photos'));
+      tx.oncomplete = () => res(out && out.result);
+      tx.onerror = () => rej(tx.error);
+    });
+  }
+  async function loadPhotos() {
+    try {
+      const d = await db();
+      await new Promise((res) => {
+        const req = d.transaction('photos').objectStore('photos').openCursor();
+        req.onsuccess = () => {
+          const cur = req.result;
+          if (!cur) return res();
+          photos.set(cur.key, URL.createObjectURL(cur.value));
+          cur.continue();
+        };
+        req.onerror = () => res();
+      });
+    } catch {}
+  }
+  // 2:3 비율로 가운데를 잘라 480×720 JPEG로 줄이기
+  async function toCardImage(file) {
+    const img = await createImageBitmap(file);
+    const W = 480, H = 720;
+    const sc = Math.max(W / img.width, H / img.height);
+    const w = img.width * sc, h = img.height * sc;
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    cv.getContext('2d').drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+    return new Promise((res) => cv.toBlob(res, 'image/jpeg', 0.85));
+  }
+  let photoKey = null;
+  function openPhoto(key) {
+    photoKey = key;
+    const owned = state.owned.includes(key);
+    const m = MEMBERS.find((x) => x[0] === key.split('-')[0]);
+    $('photoCard').innerHTML = photocardSVG(key, !owned, photos.get(key));
+    $('photoTitle').textContent = `📷 ${m[2]} · ${SETS[+key.split('-')[1]][0]}`;
+    $('photoText').textContent = owned
+      ? '갤러리에 있는 사진을 골라 이 포카에 넣어요. 사진은 이 기기에만 저장돼요.'
+      : '아직 안 뽑은 카드예요. 사진을 미리 넣어 두면 뽑을 때 짜잔! 하고 나와요.';
+    $('photoDel').hidden = !photos.has(key);
+    $('photoModal').hidden = false;
+  }
+  $('photoInput').addEventListener('change', async (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f || !photoKey) return;
+    try {
+      const blob = await toCardImage(f);
+      await dbDo('readwrite', (st) => st.put(blob, photoKey));
+      if (photos.has(photoKey)) URL.revokeObjectURL(photos.get(photoKey));
+      photos.set(photoKey, URL.createObjectURL(blob));
+      toast('📷 사진을 넣었어요!');
+      openPhoto(photoKey); renderBinder();
+    } catch { toast('사진을 넣지 못했어요. 다른 사진으로 해 볼까요?'); }
+  });
+  $('photoDel').addEventListener('click', async () => {
+    if (!photoKey) return;
+    try { await dbDo('readwrite', (st) => st.delete(photoKey)); } catch {}
+    if (photos.has(photoKey)) URL.revokeObjectURL(photos.get(photoKey));
+    photos.delete(photoKey);
+    openPhoto(photoKey); renderBinder();
+  });
+  $('photoClose').addEventListener('click', () => { $('photoModal').hidden = true; });
+
   applyTheme();
   if (state.bias) show('home'); else { renderBias(); show('bias'); }
+  loadPhotos().then(() => { if (!$('home').hidden) renderHome(); });
 
   // 설치 버튼 (Chrome/삼성 인터넷)
   let deferred = null;
