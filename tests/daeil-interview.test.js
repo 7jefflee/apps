@@ -77,6 +77,8 @@ test('저장 데이터 복구', () => {
   const load = app('loadState');
   const d = load('깨진 값');
   assert.equal(d.bias, null); assert.equal(d.voice, true);
+  assert.equal(d.date, '2026-12-21'); // 면접일 기본값
+  assert.equal(app('ddays')(d.date, new Date(2026, 10, 28)), 23);
   const s = load(JSON.stringify({ bias: 'jh', stars: 3, tickets: 1, owned: ['jh-1', 'zz-0'], done: { s1: 2, zz: 1 },
     memo: { m1: '독일어로 넓히기' }, days: ['2026-11-27', 'x'], mocks: 2, date: '2026-12-05', voice: false }));
   assert.equal(s.bias, 'jh');

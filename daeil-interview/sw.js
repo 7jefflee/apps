@@ -1,5 +1,5 @@
 // 변경할 때마다 index.html의 APP_VERSION과 같은 값으로 올린다.
-const VERSION = '1.1.0';
+const VERSION = '1.1.1';
 
 // 같은 주소(github.io) 아래 앱들이 캐시 저장소를 함께 쓰므로, 앱 경로를 캐시 이름 앞에 붙여 구분한다.
 const APP_SCOPE = new URL(self.registration.scope).pathname; // 예: /apps/gugudan/

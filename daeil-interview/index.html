@@ -409,7 +409,7 @@
 
 <script>
 const APP_NAME = '면접 스테이지';
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.1.1';
 const STORE_KEY = 'daeil-interview:v1';
 
 // ── 면접 질문 은행 (용건이 자기소개서 1~3번 + 답변 가이드 기반) ──
@@ -628,6 +628,7 @@ const FIVE = ['질문에 대한 답부터 말하자.', '내가 실제로 한 일
 const SELF_CHECKS = ['첫 문장에서 결론을 말했다', '내가 실제로 한 일을 근거로 들었다', '왜·어떻게를 설명했다', '배운 점·변화로 마무리했다'];
 const INTERVIEWERS = [['👩‍🏫', '면접관 1'], ['🧑‍💼', '면접관 2'], ['👨‍🏫', '면접관 3']];
 const MOCK_SECONDS = 360;
+const DEFAULT_DATE = '2026-12-21'; // 대일외고 면접일
 
 // ── 프로미스나인 (2025년 이후 5인: ASND) — 역사 퀘스트 앱과 같은 포카 체계 ──
 const MEMBERS = [
@@ -712,7 +713,7 @@ function drawPhotocard(owned, bias, rnd = Math.random) {
 function starsForCheck(n) { return n >= 3 ? 2 : 1; }
 
 function loadState(raw) {
-  const def = { bias: null, stars: 0, tickets: 0, owned: [], done: {}, memo: {}, days: [], mocks: 0, quick: 0, date: '', voice: true };
+  const def = { bias: null, stars: 0, tickets: 0, owned: [], done: {}, memo: {}, days: [], mocks: 0, quick: 0, date: DEFAULT_DATE, voice: true };
   try {
     const s = JSON.parse(raw);
     if (!s || typeof s !== 'object') return def;
@@ -729,7 +730,7 @@ function loadState(raw) {
       days: Array.isArray(s.days) ? s.days.filter((d) => parseDay(d)).slice(-400) : [],
       mocks: Number.isFinite(s.mocks) ? s.mocks : 0,
       quick: Number.isFinite(s.quick) ? s.quick : 0,
-      date: parseDay(s.date) ? s.date : '',
+      date: parseDay(s.date) ? s.date : DEFAULT_DATE,
       voice: s.voice !== false,
     };
   } catch {
