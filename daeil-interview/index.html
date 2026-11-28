@@ -1,0 +1,1343 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#c9b6ff">
+  <title>면접 스테이지</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <style>
+    :root {
+      --mem: #9775fa; --mem-soft: #9775fa22; --mem-deep: #5f3dc4;
+      --text: #2e2340; --muted: #7d6e90; --line: #ece2f5; --ok: #1fae74; --bad: #e5484d; --warn: #f59f00; --gold: #ffb703;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,255,255,.9) 0 2px, transparent 3px),
+        radial-gradient(circle at 88% 18%, rgba(255,255,255,.9) 0 2px, transparent 3px),
+        radial-gradient(circle at 75% 88%, rgba(255,255,255,.8) 0 2px, transparent 3px),
+        linear-gradient(140deg, #f3e8ff 0%, #ffe4f1 50%, #e3f0ff 100%);
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Noto Sans KR", sans-serif; font-size: 17px; line-height: 1.5;
+      padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+               max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+      user-select: none; -webkit-user-select: none;
+    }
+    textarea, input { user-select: text; -webkit-user-select: text; font: inherit; }
+    main { width: min(1280px, 100%); margin: 0 auto; }
+    section { display: flex; flex-direction: column; gap: 12px; }
+    h1 { margin: 0; font-size: 26px; letter-spacing: -0.5px; }
+    h2 { margin: 0; font-size: 22px; }
+    h3 { margin: 0; font-size: 17px; }
+    .sub { color: var(--muted); margin: 0; font-size: 15px; }
+    .panel { background: rgba(255,255,255,.9); border-radius: 22px; padding: 16px; box-shadow: 0 4px 18px rgba(95,61,196,.10); border: 1px solid #fff; }
+    button {
+      font: inherit; min-height: 52px; padding: 0 18px; border: 0; border-radius: 16px; font-weight: 800;
+      background: var(--mem); color: #fff; cursor: pointer;
+    }
+    button:active { transform: scale(0.97); }
+    button:disabled { opacity: .45; }
+    button.ghost { background: var(--mem-soft); color: var(--mem-deep); }
+    button.white { background: #fff; color: var(--mem-deep); border: 2px solid var(--line); }
+    button.small { min-height: 44px; font-size: 15px; padding: 0 14px; }
+    .top { display: flex; align-items: center; gap: 10px; }
+    .top h2 { flex: 1; }
+    .back { min-width: 52px; padding: 0 12px; background: #fff; color: var(--mem-deep); font-size: 22px; border: 2px solid var(--line); }
+    .pill { display: inline-flex; align-items: center; gap: 6px; background: #fff; border-radius: 99px; padding: 6px 14px; font-weight: 800; font-size: 15px; border: 2px solid var(--line); white-space: nowrap; }
+    .tag { align-self: flex-start; background: var(--mem-soft); color: var(--mem-deep); font-size: 13px; font-weight: 800; padding: 4px 12px; border-radius: 99px; }
+    .bar { height: 12px; background: #eee3f7; border-radius: 99px; overflow: hidden; }
+    .bar > i { display: block; height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, var(--mem), #ff8fc0); transition: width .4s; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .row > * { flex: 1; }
+    [hidden] { display: none !important; }
+
+    /* 홈 */
+    .home-grid { display: grid; gap: 14px; }
+    .home-left, .home-right { display: grid; gap: 12px; align-content: start; }
+    .hero { background: linear-gradient(135deg, var(--mem), #ff8fc0); color: #fff; border-radius: 26px; padding: 18px; position: relative; overflow: hidden; }
+    .hero::after { content: "✦ ✧ ✦"; position: absolute; right: 16px; top: 10px; font-size: 22px; opacity: .7; letter-spacing: 6px; }
+    .hero .sub { color: #fff; opacity: .95; }
+    .hero .bar { background: rgba(255,255,255,.35); margin-top: 10px; }
+    .hero .bar > i { background: #fff; }
+    .me { display: flex; gap: 14px; align-items: center; }
+    .me .mini { width: 96px; flex-shrink: 0; filter: drop-shadow(0 4px 10px rgba(0,0,0,.18)); }
+    .me .mini svg { width: 100%; height: auto; display: block; border-radius: 10px; }
+    .dday { font-size: 34px; font-weight: 900; line-height: 1.1; }
+    .stars-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; font-weight: 800; }
+    .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .mode { min-height: 120px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+            text-align: left; gap: 2px; padding: 14px 18px; border-radius: 24px; background: rgba(255,255,255,.93); color: var(--text);
+            box-shadow: 0 4px 18px rgba(95,61,196,.10); border: 2px solid #fff; }
+    .mode.big { background: linear-gradient(135deg, #fff, #f3ecff); border-color: var(--mem); }
+    .mode b { font-size: 21px; }
+    .mode span { font-weight: 500; font-size: 14px; color: var(--muted); }
+    .mode .em { font-size: 34px; line-height: 1.1; }
+    .settings { display: flex; gap: 10px; flex-wrap: wrap; }
+    .settings button { flex: 1; min-width: 130px; }
+    .foot { text-align: center; font-size: 13px; color: var(--muted); }
+
+    /* 최애 */
+    .bias-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+    .bias-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px; min-height: 0; background: #fff; color: var(--text); border: 3px solid transparent; }
+    .bias-btn.on { border-color: var(--mem); }
+    .bias-btn svg { width: 100%; max-width: 150px; height: auto; border-radius: 10px; }
+
+    /* 질문 목록 */
+    .qgroup h3 { margin-bottom: 8px; color: var(--mem-deep); }
+    .qlist { display: grid; gap: 8px; }
+    .qitem { display: flex; align-items: center; gap: 10px; text-align: left; background: #fff; color: var(--text); border: 2px solid var(--line);
+             min-height: 60px; font-weight: 700; font-size: 16px; padding: 8px 14px; line-height: 1.4; word-break: keep-all; }
+    .qitem .n { flex: 1; }
+    .qitem small { color: var(--muted); font-weight: 700; white-space: nowrap; }
+
+    /* 연습 */
+    .practice { display: grid; gap: 12px; }
+    .qcard { display: grid; gap: 12px; }
+    .qtext { font-size: 24px; font-weight: 800; line-height: 1.5; word-break: keep-all; }
+    .interviewers { display: flex; gap: 12px; justify-content: center; }
+    .iv { display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: .45; transition: all .3s; font-size: 13px; font-weight: 800; color: var(--muted); }
+    .iv span { font-size: 40px; width: 70px; height: 70px; border-radius: 50%; background: #fff; display: grid; place-items: center; border: 3px solid var(--line); }
+    .iv.on { opacity: 1; color: var(--mem-deep); transform: scale(1.08); }
+    .iv.on span { border-color: var(--mem); box-shadow: 0 0 0 6px var(--mem-soft); }
+    .recbox { display: grid; gap: 10px; justify-items: center; text-align: center; }
+    .recbtn { width: 120px; height: 120px; border-radius: 50%; font-size: 40px; padding: 0; background: var(--bad); box-shadow: 0 6px 20px rgba(229,72,77,.35); }
+    .recbtn.on { animation: pulse 1.2s infinite; background: #c92a2a; }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(229,72,77,.5); } 50% { box-shadow: 0 0 0 18px rgba(229,72,77,0); } }
+    .timer { font-size: 40px; font-weight: 900; font-variant-numeric: tabular-nums; }
+    .timer.good { color: var(--ok); } .timer.long { color: var(--bad); } .timer.short { color: var(--muted); }
+    .zone { font-size: 14px; color: var(--muted); font-weight: 700; }
+    audio { width: 100%; }
+    .reveal-btn { width: 100%; }
+    .info { display: grid; gap: 10px; }
+    .keys { display: flex; flex-wrap: wrap; gap: 8px; }
+    .keys span { background: var(--mem-soft); color: var(--mem-deep); font-weight: 800; padding: 6px 12px; border-radius: 99px; font-size: 15px; }
+    .skel { display: grid; gap: 6px; }
+    .skel div { display: grid; grid-template-columns: 70px 1fr; gap: 8px; font-size: 15px; word-break: keep-all; }
+    .skel b { color: var(--mem-deep); }
+    .tails { margin: 0; padding-left: 20px; font-size: 15px; word-break: keep-all; }
+    .note { background: #fff8e1; border-radius: 14px; padding: 10px 12px; font-size: 14px; word-break: keep-all; }
+    textarea { width: 100%; min-height: 90px; border-radius: 14px; border: 2px solid var(--line); padding: 10px; resize: vertical; font-size: 16px; }
+    .checks { display: grid; gap: 8px; }
+    .ck { display: flex; align-items: center; gap: 10px; text-align: left; background: #fff; color: var(--text); border: 2px solid var(--line); min-height: 52px; font-weight: 700; font-size: 15px; padding: 6px 12px; }
+    .ck i { width: 26px; height: 26px; border-radius: 8px; border: 2px solid var(--line); display: grid; place-items: center; font-style: normal; color: #fff; flex-shrink: 0; }
+    .ck.on { border-color: var(--ok); background: #e9f9f1; }
+    .ck.on i { background: var(--ok); border-color: var(--ok); }
+
+    /* 첫 문장 훈련 */
+    .count { font-size: 80px; font-weight: 900; color: var(--mem-deep); text-align: center; line-height: 1; }
+    .phase { text-align: center; font-weight: 800; font-size: 20px; }
+
+    /* 모의면접 결과 */
+    .res { display: grid; gap: 10px; }
+    .res .item { display: grid; gap: 6px; }
+    .dur { font-weight: 900; }
+    .dur.good { color: var(--ok); } .dur.long { color: var(--bad); } .dur.short { color: var(--muted); }
+
+    /* 원칙 */
+    .tips { display: grid; gap: 10px; }
+    .tip b { color: var(--mem-deep); font-size: 17px; }
+    .tip p { margin: 4px 0 0; font-size: 15px; word-break: keep-all; }
+
+    /* 포카 */
+    .binder { display: grid; gap: 14px; }
+    .brow h3 { margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+    .brow h3 i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+    .bcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .bcards button { padding: 0; min-height: 0; background: none; border-radius: 12px; position: relative; }
+    .bcards svg { width: 100%; height: auto; display: block; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+    .badge { position: absolute; right: 8px; bottom: 8px; background: rgba(46,35,64,.75); color: #fff; font-size: 12px; font-weight: 800; border-radius: 99px; padding: 2px 8px; }
+    .modal { position: fixed; inset: 0; background: rgba(46,35,64,.55); display: grid; place-items: center; z-index: 20; padding: 20px; }
+    .modal .box { background: #fff; border-radius: 28px; padding: 20px; width: min(420px, 100%); text-align: center; display: grid; gap: 12px; max-height: 95vh; overflow: auto; }
+    .reveal { width: min(220px, 55vw); margin: 0 auto; }
+    .reveal svg { width: 100%; height: auto; display: block; border-radius: 14px; box-shadow: 0 10px 30px rgba(95,61,196,.35); }
+    .reveal.spin { animation: pop .9s ease-out; }
+    @keyframes pop { 0% { transform: rotateY(540deg) scale(.4); opacity: 0 } 70% { transform: rotateY(0) scale(1.06); opacity: 1 } 100% { transform: scale(1) } }
+    .pins { display: flex; justify-content: center; gap: 16px; margin: 4px 0; }
+    .pins i { width: 18px; height: 18px; border-radius: 50%; border: 3px solid var(--mem); display: block; }
+    .pins i.on { background: var(--mem); }
+    .pins.bad { animation: shake .35s; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+    .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .pad button { min-height: 64px; font-size: 26px; background: #fff; color: var(--text); border: 2px solid var(--line); }
+    .filebtn { display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 16px; background: var(--mem); color: #fff; font-weight: 800; cursor: pointer; }
+    input[type=date] { min-height: 52px; border-radius: 14px; border: 2px solid var(--line); padding: 0 12px; font-size: 18px; width: 100%; }
+    .toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(30px); opacity: 0;
+             background: #2e2340; color: #fff; padding: 12px 20px; border-radius: 99px; font-weight: 800; z-index: 30; transition: all .3s; max-width: 90vw; text-align: center; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (min-width: 900px) {
+      body { font-size: 18px; }
+      .home-grid { grid-template-columns: 400px 1fr; align-items: start; }
+      .mode { min-height: 150px; }
+      .practice { grid-template-columns: 1fr 1fr; align-items: start; }
+      .qtext { font-size: 28px; }
+      .qlist { grid-template-columns: 1fr 1fr; }
+      .bcards { grid-template-columns: repeat(6, 1fr); }
+      .bias-grid { grid-template-columns: repeat(5, 1fr); }
+      .tips { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <!-- 최애 고르기 -->
+  <section id="bias" hidden>
+    <div class="top"><button class="back" data-back id="biasBack">←</button><h2>💖 최애 멤버를 골라 주세요!</h2></div>
+    <p class="sub">최애 색깔로 앱이 꾸며지고, 포카 뽑기에서 최애가 더 잘 나와요.</p>
+    <div class="bias-grid" id="biasGrid"></div>
+  </section>
+
+  <!-- 홈 -->
+  <section id="home" hidden>
+    <div class="home-grid">
+      <div class="home-left">
+        <div class="hero">
+          <div class="me">
+            <div class="mini" id="heroCard"></div>
+            <div>
+              <h1>면접 스테이지</h1>
+              <p class="sub">플로버 용건이의 대일외고 독일어과 면접 준비</p>
+              <div class="dday" id="ddayText">D-?</div>
+              <p class="sub" style="font-weight:800" id="streakText"></p>
+            </div>
+          </div>
+          <div class="stars-row"><span id="starText">⭐ 0 / 10</span><span id="ticketText">🎟 0장</span></div>
+          <div class="bar"><i id="starBar"></i></div>
+        </div>
+        <div class="row">
+          <button id="drawBtn">🎁 포카 뽑기</button>
+          <button class="white" id="binderBtn">📒 바인더 0/30</button>
+        </div>
+        <div class="panel">
+          <div class="row" style="justify-content:space-between; font-weight:800; font-size:15px"><span id="doneText">연습한 질문 0 / 0</span><span id="mockText">모의면접 0회</span></div>
+          <div class="bar" style="margin-top:8px"><i id="doneBar"></i></div>
+        </div>
+      </div>
+      <div class="home-right">
+        <div class="modes">
+          <button class="mode big" data-go="mock"><span class="em">🎤</span><b>실전 모의면접</b><span>3:1 · 6분 · 6문항 + 꼬리질문 · 완주 ⭐+5</span></button>
+          <button class="mode" data-go="list"><span class="em">🃏</span><b>질문별 연습</b><span>말하고 녹음 → 다시 듣기 → 셀프 체크</span></button>
+          <button class="mode" data-go="quick"><span class="em">⚡</span><b>첫 문장 훈련</b><span>5초 생각 → 결론 한 문장 말하기</span></button>
+          <button class="mode" data-go="tips"><span class="em">📋</span><b>답변 원칙</b><span>꼭 기억할 8가지 · 면접 직전 체크</span></button>
+        </div>
+        <div class="settings">
+          <button class="small white" id="dateBtn">📅 면접 날짜</button>
+          <button class="small white" id="biasBtn">💖 최애 바꾸기</button>
+          <button class="small white" id="voiceBtn">🔊 질문 읽어주기 켜짐</button>
+          <button class="small white" id="adminBtn" style="flex:0 0 auto; min-width:0">🔐 관리자</button>
+        </div>
+        <p class="foot">⭐ 10개 = 포카 뽑기권 1장 · 녹음은 이 기기에만 저장돼요 · <span id="version"></span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 질문 목록 -->
+  <section id="list" hidden>
+    <div class="top"><button class="back" data-back>←</button><h2>🃏 질문별 연습</h2><span class="pill" id="listCount"></span></div>
+    <div id="qGroups" style="display:grid; gap:12px"></div>
+  </section>
+
+  <!-- 질문 연습 -->
+  <section id="practice" hidden>
+    <div class="top"><button class="back" id="practiceBack">←</button><h2 id="pTitle">질문 연습</h2><button class="small ghost" id="pNext">다음 질문 ▶</button></div>
+    <div class="practice">
+      <div style="display:grid; gap:12px">
+        <div class="panel qcard">
+          <span class="tag" id="pTag"></span>
+          <div class="qtext" id="pQ"></div>
+          <div class="row"><button class="small white" id="pSpeak">🔊 질문 듣기</button></div>
+        </div>
+        <div class="panel recbox">
+          <div class="timer short" id="pTimer">0:00</div>
+          <div class="zone">초록색(20~30초)이 목표 · 40초가 넘으면 빨간색</div>
+          <button class="recbtn" id="pRec">🎙</button>
+          <p class="sub" id="pRecHint">버튼을 누르고 말해 보세요</p>
+          <audio id="pAudio" controls hidden></audio>
+        </div>
+      </div>
+      <div style="display:grid; gap:12px">
+        <div class="panel info">
+          <button class="ghost reveal-btn" id="pReveal">💡 키워드·뼈대 보기 (말해 본 다음에!)</button>
+          <div id="pInfo" hidden class="info">
+            <div><h3>🔑 키워드</h3><div class="keys" id="pKeys" style="margin-top:6px"></div></div>
+            <div><h3>🦴 답변 뼈대</h3><div class="skel" id="pSkel" style="margin-top:6px"></div></div>
+            <div><h3>↪ 꼬리질문 대비</h3><ul class="tails" id="pTails"></ul></div>
+            <div class="note" id="pNote" hidden></div>
+          </div>
+        </div>
+        <div class="panel info">
+          <h3>✍️ 내 말로 메모 (첫 문장·키워드)</h3>
+          <textarea id="pMemo" placeholder="예) 결론: ~ 때문입니다 / 키워드: 녹음, 비교, 재미"></textarea>
+        </div>
+        <div class="panel info">
+          <h3>✅ 셀프 체크</h3>
+          <div class="checks" id="pChecks"></div>
+          <button id="pDone">체크 완료 ⭐</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 모의면접 -->
+  <section id="mock" hidden>
+    <div class="top"><button class="back" id="mockBack">←</button><h2>🎤 실전 모의면접</h2><span class="pill" id="mClock">6:00</span></div>
+    <div id="mPlay" class="practice">
+      <div style="display:grid; gap:12px">
+        <div class="panel"><div class="interviewers" id="mIvs"></div></div>
+        <div class="panel qcard">
+          <span class="tag" id="mTag"></span>
+          <div class="qtext" id="mQ"></div>
+        </div>
+      </div>
+      <div class="panel recbox">
+        <p class="sub" id="mStep"></p>
+        <div class="timer short" id="mTimer">0:00</div>
+        <div class="zone">20~30초에 핵심 → 근거 → 변화</div>
+        <button class="recbtn" id="mRec">🎙</button>
+        <button id="mNext" style="width:100%">답변 끝 ▶</button>
+        <p class="sub" id="mHint">질문을 듣고 마이크 버튼을 눌러 답해요</p>
+      </div>
+    </div>
+    <div id="mDone" hidden style="display:grid; gap:12px">
+      <div class="panel" style="text-align:center">
+        <h2>🎉 모의면접 완주!</h2>
+        <p class="sub" id="mSummary"></p>
+      </div>
+      <div class="res" id="mRes"></div>
+      <div class="panel">
+        <h3>면접 직전 5가지 체크</h3>
+        <ol id="mFive" style="margin:8px 0 0; padding-left:20px"></ol>
+      </div>
+      <div class="row"><button id="mAgain">한 번 더!</button><button class="ghost" data-back>홈으로</button></div>
+    </div>
+  </section>
+
+  <!-- 첫 문장 훈련 -->
+  <section id="quick" hidden>
+    <div class="top"><button class="back" id="quickBack">←</button><h2>⚡ 첫 문장 훈련</h2><span class="pill" id="qkCount">0개</span></div>
+    <div class="practice">
+      <div class="panel qcard">
+        <span class="tag" id="qkTag"></span>
+        <div class="qtext" id="qkQ"></div>
+      </div>
+      <div class="panel" style="display:grid; gap:12px">
+        <div class="phase" id="qkPhase"></div>
+        <div class="count" id="qkCountdown"></div>
+        <div id="qkAns" hidden class="info">
+          <h3>💬 첫 문장 예시</h3>
+          <div class="note" id="qkCore"></div>
+          <div class="keys" id="qkKeys"></div>
+          <div class="row"><button class="ghost" id="qkAgain">😵 한 번 더</button><button id="qkGood">😎 말했어요 ⭐+1</button></div>
+        </div>
+        <button id="qkStart">시작 ▶</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 원칙 -->
+  <section id="tips" hidden>
+    <div class="top"><button class="back" data-back>←</button><h2>📋 답변 원칙</h2></div>
+    <div class="panel"><b>기억할 한 문장</b><p class="sub" style="margin-top:4px">면접은 많이 아는 것을 자랑하는 자리가 아니라, 내가 어떻게 공부하고 생각하며 행동하는 학생인지를 보여주는 자리다.</p></div>
+    <div class="tips" id="tipList"></div>
+    <div class="panel"><b>답변의 기본 구조</b><p style="margin:6px 0 0">핵심 주장 → 구체적 근거 → 배운 점·변화 → (필요하면) 앞으로의 적용</p></div>
+    <div class="panel"><b>면접 직전 5가지 체크</b><ol id="tipFive" style="margin:6px 0 0; padding-left:20px"></ol></div>
+    <div class="panel"><b>🙊 블라인드 면접 주의</b><p class="sub" style="margin-top:4px">이름, 출신 중학교, 부모님 직업, 사교육·외부 수상은 말하지 않아요. (학교 안내 자료로 한 번 더 확인)</p></div>
+  </section>
+
+  <!-- 바인더 -->
+  <section id="binder" hidden>
+    <div class="top"><button class="back" data-back>←</button><h2>📒 포카 바인더</h2><span class="pill" id="binderCount">0 / 30</span></div>
+    <div class="binder" id="binderList"></div>
+  </section>
+
+  <!-- 관리자 -->
+  <section id="admin" hidden>
+    <div class="top"><button class="back" data-back>←</button><h2>🔐 관리자 · 포카 사진 등록</h2><span class="pill" id="adminCount">0 / 30</span></div>
+    <p class="sub">역사 퀘스트 앱과 같은 사진을 함께 써요. 여기서 바꾸면 두 앱 모두 바뀌어요. 사진은 이 기기에만 저장돼요.</p>
+    <div class="binder" id="adminList"></div>
+  </section>
+</main>
+
+<div class="modal" id="drawModal" hidden>
+  <div class="box">
+    <h2 id="drawTitle">✨ 포카 뽑기 ✨</h2>
+    <div class="reveal" id="drawCard"></div>
+    <p class="sub" id="drawText"></p>
+    <div class="row"><button id="drawAgain">한 장 더!</button><button class="ghost" id="drawClose">닫기</button></div>
+  </div>
+</div>
+<div class="modal" id="pinModal" hidden>
+  <div class="box">
+    <h2>🔐 관리자 비밀번호</h2>
+    <div class="pins" id="pinDots"><i></i><i></i><i></i><i></i></div>
+    <div class="pad" id="pinPad"></div>
+    <button class="ghost" id="pinClose">닫기</button>
+  </div>
+</div>
+<div class="modal" id="photoModal" hidden>
+  <div class="box">
+    <h2 id="photoTitle">📷 포카 사진</h2>
+    <div class="reveal" id="photoCard"></div>
+    <p class="sub" id="photoText"></p>
+    <label class="filebtn"><input type="file" accept="image/*" id="photoInput" hidden><span>📷 갤러리에서 사진 고르기</span></label>
+    <div class="row"><button class="ghost" id="photoDel">🗑 사진 빼기</button><button class="ghost" id="photoClose">닫기</button></div>
+  </div>
+</div>
+<div class="modal" id="dateModal" hidden>
+  <div class="box">
+    <h2>📅 면접 날짜</h2>
+    <input type="date" id="dateInput">
+    <div class="row"><button id="dateSave">저장</button><button class="ghost" id="dateClose">닫기</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<button id="install" hidden style="position:fixed;right:16px;bottom:max(16px,env(safe-area-inset-bottom));z-index:15">📲 설치</button>
+
+<script>
+const APP_NAME = '면접 스테이지';
+const APP_VERSION = '1.0.0';
+const STORE_KEY = 'daeil-interview:v1';
+
+// ── 면접 질문 은행 (용건이 자기소개서 1~3번 + 답변 가이드 기반) ──
+const TYPES = {
+  self: ['자기주도학습', '📚'],
+  motive: ['지원동기·진로', '🎯'],
+  char: ['인성', '🤝'],
+  end: ['마무리', '🎤'],
+};
+// core: 첫 문장 예시 / ev: 근거 / ch: 변화·배운 점 / note: 주의·확인할 점
+const QUESTIONS = [
+  // ① 자기주도학습
+  { id: 's1', type: 'self', q: '자기주도적으로 공부한 경험 중 가장 기억에 남는 것을 말해 보세요.',
+    keys: ['팝송 받아쓰기', '내 목소리 녹음 → 원곡과 비교', '들리지 않던 소리', '스스로 해결하는 재미'],
+    core: '팝송 가사를 받아쓰면서 모르는 것을 직접 해결하는 공부의 재미를 알게 된 경험입니다.',
+    ev: '안 들리는 부분은 제 목소리를 녹음해 원곡과 비교하고 다시 따라 했습니다.',
+    ch: '처음엔 안 들리던 소리가 들리기 시작했고, 가사 해석 → 원서·영문 기사로 공부를 넓혔습니다.',
+    tails: ['왜 녹음해서 비교하는 방법을 골랐나요?', '그 방법으로도 해결되지 않은 부분은 어떻게 했나요?', '그 경험이 지금 공부 방식에 어떻게 남아 있나요?'] },
+  { id: 's2', type: 'self', q: '영문 기사나 원서를 읽다가 모르는 표현이 나오면 어떻게 했나요?',
+    keys: ['문맥으로 먼저 짐작', '영영사전으로 확인', '문단별 주장·근거 정리'],
+    core: '바로 사전을 찾기보다 문맥으로 먼저 뜻을 짐작하고, 영영사전으로 확인했습니다.',
+    ev: '짐작한 뜻과 사전 뜻을 비교하면서 문단마다 주장과 근거를 정리했습니다.',
+    ch: '단어 하나보다 글 전체의 흐름을 보면서 읽는 습관이 생겼습니다.',
+    tails: ['왜 영한사전이 아니라 영영사전을 썼나요?', '짐작이 틀렸던 경우가 있었나요? 그때 어떻게 했나요?'] },
+  { id: 's3', type: 'self', q: '같은 사건을 다룬 기사를 여러 매체에서 찾아 비교한 이유는 무엇인가요?',
+    keys: ['제목과 표현이 달라 궁금', '공통된 사실', '매체마다 강조하는 내용', '사실과 기자의 평가 구분'],
+    core: '같은 사건인데도 기사마다 제목과 표현이 달라서, 무엇이 사실이고 무엇이 평가인지 궁금했기 때문입니다.',
+    ev: '여러 매체의 기사를 읽으며 공통된 사실과 각 매체가 강조하는 내용을 나눠 정리했습니다.',
+    ch: '한 기사만 읽고 판단하지 않고, 사실과 의견을 구분해서 읽게 되었습니다.',
+    tails: ['사실과 기자의 평가는 어떻게 구분했나요? 예를 하나 들어 보세요.', '어떤 매체들을 비교했나요?', '비교해 보니 가장 크게 달랐던 점은 무엇이었나요?'],
+    note: '실제로 읽은 매체·기사만 말해요. 기억나지 않으면 "정확한 매체 이름은 기억나지 않지만"이라고 솔직하게.' },
+  { id: 's4', type: 'self', q: '미국이 베네수엘라 대통령을 체포한 사건에 대해 어떻게 생각하나요?',
+    keys: ['범죄 혐의가 있다면 책임', '다른 나라가 군사력으로 직접 체포?', '국가주권·무력 사용 원칙', '책임과 방법은 따로'],
+    core: '범죄 혐의가 있다면 책임을 물어야 하지만, 다른 나라가 군사력으로 직접 체포하는 방법이 옳은지는 따로 생각해야 한다고 봅니다.',
+    ev: '여러 기사를 읽다가 이 점이 궁금해져서 국가주권과 무력 사용에 관한 원칙을 찾아보았습니다.',
+    ch: '“책임을 묻는 일”과 “그 방법이 정당한가”를 구분해서 보는 눈이 생겼습니다.',
+    tails: ['그렇다면 범죄를 저지른 지도자에게는 어떻게 책임을 물어야 할까요?', '국가주권이 무엇인지 쉽게 설명해 보세요.', '무력 사용에 관한 원칙은 어디에서 찾아봤나요?'],
+    note: '꼬리질문에서 사실관계(시기, 원칙 이름)를 물을 수 있어요. 확인한 내용만 말하기. 예: 유엔 헌장 제2조 4항(다른 나라에 대한 무력 사용 금지) — 아빠와 한 번 더 확인!' },
+  { id: 's5', type: 'self', q: '아체주 공개 태형 토론에서 생각이 어떻게 바뀌었나요?',
+    keys: ['처음엔 종교·문화 존중', '친구들: 폭력적·인권 침해', '처벌받는 사람의 입장', '국제 인권 기준'],
+    core: '처음에는 문화를 존중해야 한다고만 생각했는데, 처벌받는 사람의 입장을 놓쳤다는 것을 알게 되었습니다.',
+    ev: '국어 시간 토론에서 친구들이 인권 침해라는 의견을 냈고, 이후 국제 인권 기준을 찾아보았습니다.',
+    ch: '문화 존중과 고통을 주는 처벌까지 인정하는 것은 다르다고 생각하게 됐지만, 우리 기준만으로 쉽게 판단해서도 안 된다고 느꼈습니다.',
+    tails: ['친구 말을 듣고 생각을 바꾼 것은 줏대가 없는 것 아닌가요?', '반대로 친구를 설득해 본 경험이 있나요?', '아체주 사람들이 이 비판을 들으면 뭐라고 할 것 같나요?'] },
+  { id: 's6', type: 'self', q: '다른 사회의 문제를 볼 때 무엇을 기준으로 판단해야 한다고 생각하나요?',
+    keys: ['문화는 존중', '사람에게 고통을 주는 것은 별개', '국제 인권 기준', '우리 기준만으로 판단 X'],
+    core: '그 사회의 문화는 존중하되, 사람에게 고통을 주는 일까지 문화라는 이유로 인정할 수는 없다고 생각합니다.',
+    ev: '아체주 태형 사례를 찾아보고 토론하면서 국제 인권 기준을 함께 살펴본 경험이 있습니다.',
+    ch: '판단할 때 한쪽 시각만 보지 않고, 당사자의 입장과 보편적인 기준을 같이 보려고 합니다.',
+    tails: ['문화 상대주의와 보편적 인권이 충돌하면 무엇이 먼저인가요?', '우리 사회의 관습 중 다른 나라가 비판할 만한 것이 있다면?'] },
+  { id: 's7', type: 'self', q: '처음 옳다고 생각한 것이 바뀐 뒤, 공부하는 방식에 달라진 점이 있나요?',
+    keys: ['한 자료만 믿지 않기', '반대 의견 찾아보기', '근거를 확인하고 판단'],
+    core: '이제는 처음 든 생각을 바로 결론으로 정하지 않고, 다른 자료와 의견을 더 찾아본 뒤 판단합니다.',
+    ev: '기사를 여러 매체로 비교하고, 토론에서 친구들 의견을 듣고 국제 인권 기준을 찾아본 경험이 계기가 됐습니다.',
+    ch: '내 생각도 바뀔 수 있다는 것을 알게 되어, 근거를 확인하는 습관이 생겼습니다.',
+    tails: ['최근에 그렇게 생각이 바뀐 다른 예가 있나요?'] },
+
+  // ② 지원동기·진로
+  { id: 'm1', type: 'motive', q: '대일외고 독일어과에 지원한 동기는 무엇인가요?',
+    keys: ['영문 기사로 다른 사회 문제 탐구', '독일어로 넓히기', '사회적 약자를 돕는 변호사', '여러 입장 이해'],
+    core: '영문 기사로 다른 사회의 문제를 알아본 경험을 독일어로도 넓히고 싶어서 지원했습니다.',
+    ev: '기사를 비교하며 같은 문제도 사회마다 보는 시각이 다르다는 것을 알게 되었습니다.',
+    ch: '여러 입장을 이해하는 힘은 제가 꿈꾸는, 사회적 약자를 돕는 변호사에게 꼭 필요한 능력이라고 생각합니다.',
+    tails: ['왜 영어과가 아니라 독일어과인가요?', '독일어를 공부해 본 적이 있나요?', '독일어권 사회의 문제 중 관심 있는 것이 있나요?'],
+    note: '독일어 실력이나 경험은 실제로 한 만큼만 말해요.' },
+  { id: 'm2', type: 'motive', q: '영어로도 다른 사회를 알 수 있는데, 왜 독일어가 필요하다고 생각하나요?',
+    keys: ['영어권 시각만 보게 됨', '독일어권 기사와 비교', '같은 문제, 다른 강조점'],
+    core: '영어 기사만 읽으면 영어권의 시각으로만 문제를 보게 될 수 있다고 생각했기 때문입니다.',
+    ev: '같은 사건도 매체마다 강조하는 점이 달랐던 것처럼, 언어권마다도 다를 것이라고 생각합니다.',
+    ch: '독일어권과 영어권 기사가 같은 문제에서 무엇을 강조하는지 직접 비교해 보고 싶습니다.',
+    tails: ['독일어권과 영어권의 시각이 다를 것 같은 주제를 하나 들어 보세요.'] },
+  { id: 'm3', type: 'motive', q: '『10대를 위한 정의란 무엇인가』를 읽고 무엇을 느꼈나요?',
+    keys: ['같은 규칙이 적용되어도', '권리를 제대로 보호받지 못하는 사람', '사회적 약자', '변호사의 꿈'],
+    core: '같은 규칙이 적용되어도 권리를 제대로 보호받지 못하는 사람이 있다는 점이 가장 기억에 남았습니다.',
+    ev: '책을 읽으며 공정한 규칙만으로는 충분하지 않을 수 있다는 것을 알게 되었습니다.',
+    ch: '그때부터 사회적 약자를 돕는 변호사를 꿈꾸게 되었습니다.',
+    tails: ['같은 규칙이 적용돼도 보호받지 못하는 예를 하나 들어 보세요.', '책 내용 중 동의하기 어려웠던 부분이 있나요?'],
+    note: '책의 세부 내용은 실제로 읽고 기억하는 부분만 말해요.' },
+  { id: 'm4', type: 'motive', q: '사회적 약자를 돕는 변호사가 되려면 어떤 능력이 필요하다고 생각하나요?',
+    keys: ['여러 입장 이해', '근거를 들어 설명', '사회문제의 원인 이해'],
+    core: '여러 입장을 이해하고, 근거를 들어 설득력 있게 설명하는 능력이 필요하다고 생각합니다.',
+    ev: '기사를 비교하고 토론하면서 한쪽 말만 들으면 판단이 쉽게 틀릴 수 있다는 것을 경험했습니다.',
+    ch: '그래서 지금도 자료를 비교하고 근거를 정리하는 연습을 하고 있습니다.',
+    tails: ['그 능력을 키우기 위해 지금 하고 있는 것은 무엇인가요?', '변호사가 아닌 다른 방법으로도 약자를 도울 수 있지 않을까요?'] },
+  { id: 'm5', type: 'motive', q: 'FOZ 활동을 어떻게 하고 싶은지 구체적으로 말해 보세요.',
+    keys: ['15분 동안 전공어(독일어)로 대화', '수업에서 배운 표현 활용', '영어 표현 ↔ 독일어 표현', '게시판 공유·친구 답과 비교'],
+    core: '수업에서 배운 독일어 표현을 FOZ에서 직접 써 보면서 영어 표현과 비교해 보고 싶습니다.',
+    ev: '영어 표현에 맞는 독일어 표현을 찾아 게시판에 올리고, 친구들의 답과 비교해 볼 계획입니다.',
+    ch: '같은 뜻을 두 언어가 왜 다르게 표현하는지도 알아보고 싶습니다.',
+    tails: ['FOZ가 어떤 프로그램인지 알고 있나요?', '15분 동안 독일어로만 말하기 어렵다면 어떻게 준비하겠어요?', '영어와 독일어가 다르게 표현하는 예를 아는 것이 있나요?'],
+    note: 'FOZ = 15분 동안 자기 전공어로 대화하는 프로그램(학교 안내 기준). 독일어 예시는 정확히 아는 것만!' },
+  { id: 'm6', type: 'motive', q: '입학하면 시사토론반에서 어떤 활동을 하고 싶나요?',
+    keys: ['사회적 약자의 권리', '친구들과 의견 나누기', '독일어권·영어권 기사 비교'],
+    core: '사회적 약자의 권리를 주제로 친구들과 의견을 나누고 싶습니다.',
+    ev: '토론에서 친구들의 의견 덕분에 제가 놓친 점을 알게 된 경험이 있기 때문입니다.',
+    ch: '독일어가 익숙해지면 독일어권과 영어권 기사를 함께 가져와 비교하며 토론하고 싶습니다.',
+    tails: ['처음으로 다뤄 보고 싶은 주제는 무엇인가요?', '토론에서 나와 의견이 크게 다른 친구가 있다면 어떻게 하겠어요?'] },
+  { id: 'm7', type: 'motive', q: '변호사가 꿈인데 대학에서는 왜 사회학을 전공하려고 하나요?',
+    keys: ['사회문제의 원인 공부', '법학전문대학원 진학', '약자 문제의 구조 이해'],
+    core: '사회문제가 왜 생기는지 그 원인을 먼저 공부하고 싶기 때문입니다.',
+    ev: '사회적 약자의 권리 문제는 법만이 아니라 사회 구조와도 연결되어 있다고 생각했습니다.',
+    ch: '사회학을 공부한 뒤 법학전문대학원에 진학해, 원인을 이해하는 변호사가 되고 싶습니다.',
+    tails: ['사회학과 법학은 어떻게 다르다고 생각하나요?', '관심 있는 사회문제를 하나 들어 보세요.'] },
+  { id: 'm8', type: 'motive', q: '입학 후 3년 동안의 학습 계획을 말해 보세요.',
+    keys: ['독일어 수업 + FOZ', '시사토론반', '독일어권·영어권 기사 비교 탐구', '진로와 연결'],
+    core: '독일어를 익혀 독일어권과 영어권 기사를 직접 비교하는 탐구까지 해 보는 것이 목표입니다.',
+    ev: '수업과 FOZ로 표현을 익히고, 시사토론반에서 사회적 약자의 권리를 주제로 토론하겠습니다.',
+    ch: '이 과정을 사회학 전공과 변호사라는 진로로 이어 가고 싶습니다.',
+    tails: ['계획대로 되지 않으면 어떻게 하겠어요?'] },
+
+  // ③ 인성
+  { id: 'c1', type: 'char', q: '영화 제작 경험을 통해 책임감에 대한 생각이 어떻게 달라졌나요?',
+    keys: ['내 일만 끝내면 된다고 생각', '혼자 남은 감독', '편집 돕기·역할 나누기', '함께하는 목표를 위한 일 찾기'],
+    core: '처음에는 제가 맡은 일만 끝내면 책임을 다한 것이라고 생각했습니다.',
+    ev: '혼자 남아 일하는 감독을 보고 먼저 편집을 돕고, 친구들과 시간과 역할을 나누었습니다.',
+    ch: '책임감은 제 일만 잘하는 것이 아니라, 함께하는 목표를 위해 필요한 일을 찾는 것이기도 하다고 생각하게 됐습니다.',
+    tails: ['먼저 간 친구들에게 서운하지 않았나요?', '같은 상황이 또 생기면 어떻게 하겠어요?'],
+    example: '“처음에는 제가 맡은 일만 끝내면 책임을 다한 것이라고 생각했습니다. 그런데 영화 제작 당시 감독이 혼자 남아 일하는 것을 보니 각자 자기 일만 해서는 영화를 완성하기 어렵겠다고 생각했습니다. 그래서 먼저 편집을 돕고 친구들과 시간과 역할을 나누었습니다. 이 경험을 통해 책임감은 제 일만 잘하는 것이 아니라 함께하는 목표를 위해 필요한 일을 찾는 것이기도 하다는 생각을 하게 됐습니다.”' },
+  { id: 'c2', type: 'char', q: '친구들이 먼저 떠나 작업이 멈출 뻔했을 때 어떻게 했나요?',
+    keys: ['솔직히 나도 가려 했음', '혼자 남은 감독을 봄', '1학년 때 배운 편집으로 먼저 돕기', '친구들도 하나둘 남음'],
+    core: '처음에는 저도 함께 가려고 했지만, 혼자 남은 감독을 보고 남아서 돕기로 했습니다.',
+    ev: '1학년 때 동영상을 만들며 배운 편집 방법으로 감독을 돕자, 다른 친구들도 하나둘 남았습니다.',
+    ch: '말로 설득하기보다 먼저 행동하는 것이 분위기를 바꿀 수 있다는 것을 알게 됐습니다.',
+    tails: ['친구들이 다시 남은 이유는 뭐라고 생각하나요?', '끝까지 돕지 않는 친구가 있었다면 어떻게 했을까요?'] },
+  { id: 'c3', type: 'char', q: '조감독으로서 친구들과 일을 어떻게 나눴나요?',
+    keys: ['가능한 시간 맞추기', '촬영·편집에 필요한 일 정리', '각자 역할 맡기', '끝까지 완성'],
+    core: '친구들이 가능한 시간을 먼저 맞추고, 촬영과 편집에 필요한 일을 나눠 각자 역할을 맡도록 했습니다.',
+    ev: '그 결과 계획한 영화를 끝까지 완성할 수 있었습니다.',
+    ch: '함께하는 일에서는 친구들이 각자 할 일을 찾도록 돕는 것도 중요하다는 것을 배웠습니다.',
+    tails: ['역할 분담에 불만이 있는 친구는 없었나요?', '조감독으로서 가장 어려웠던 점은 무엇인가요?'] },
+  { id: 'c4', type: 'char', q: '영화 제작 이후 실제로 달라진 행동이 있나요?',
+    keys: ['모둠 활동에서 내 일 후 전체 진행 살피기', '어려운 친구에게 도울 일 찾기'],
+    core: '모둠 활동에서 제 일을 마친 뒤에도 전체 진행 상황을 먼저 살피게 되었습니다.',
+    ev: '어려움을 겪는 친구가 있으면 도울 일이 없는지 먼저 물어보았습니다.',
+    ch: '함께하는 일의 결과까지 제 책임이라고 생각하게 되었습니다.',
+    tails: ['구체적인 장면을 하나 말해 보세요.'],
+    note: '실제로 있었던 모둠 활동 장면 하나를 미리 떠올려 두기!' },
+  { id: 'c5', type: 'char', q: '다른 사람과 의견이 다를 때 어떻게 하나요?',
+    keys: ['상대의 근거 듣기', '내가 놓친 점 인정', '자료로 다시 확인', '내 판단을 내 말로'],
+    core: '먼저 상대가 왜 그렇게 생각하는지 근거를 듣고, 제가 놓친 점이 있는지 확인합니다.',
+    ev: '아체주 태형 토론에서 친구들 의견을 듣고 처벌받는 사람의 입장을 놓쳤다는 것을 알게 됐습니다.',
+    ch: '그 뒤 국제 인권 기준을 찾아보고, 근거를 바탕으로 제 생각을 다시 정리했습니다.',
+    tails: ['끝까지 의견이 좁혀지지 않으면 어떻게 하나요?'] },
+  { id: 'c6', type: 'char', q: '앞에서 이끄는 사람과 뒤에서 돕는 사람 중 어느 쪽에 더 가깝나요?',
+    keys: ['조감독 = 돕는 역할', '먼저 행동해서 분위기 바꿈', '필요한 일을 찾는 사람'],
+    core: '필요한 일을 먼저 찾아 돕는 쪽에 더 가깝다고 생각합니다.',
+    ev: '영화 제작에서 조감독으로 감독을 먼저 돕자 친구들도 함께 참여하게 되었습니다.',
+    ch: '돕는 역할도 팀을 움직일 수 있다는 것을 배웠습니다.',
+    tails: ['리더를 맡게 된다면 어떤 리더가 되고 싶나요?'] },
+
+  // 마무리
+  { id: 'e1', type: 'end', q: '마지막으로 하고 싶은 말이 있나요?',
+    keys: ['짧게(10~15초)', '내가 어떤 학생인지 한 문장', '독일어과에서 하고 싶은 것'],
+    core: '저는 궁금한 것을 직접 찾아 비교하고, 다른 의견을 들으며 생각을 넓혀 온 학생입니다.',
+    ev: '대일외고 독일어과에서 그 공부를 독일어로 넓히고 싶습니다.',
+    ch: '',
+    tails: [],
+    note: '길게 말하지 않기. 감사 인사로 깔끔하게 끝내기.' },
+];
+
+// 답변 원칙 8가지 (가이드 1번)
+const PRINCIPLES = [
+  ['01 결론부터 말하기', '가장 중요한 답을 첫 문장에서. 배경 설명이나 개념 정의부터 길게 시작하지 않기.'],
+  ['02 내 경험을 근거로 말하기', '“소통과 배려가 중요합니다”로 끝내지 말고, 실제 장면이나 내가 한 행동 하나를 근거로.'],
+  ['03 왜·어떻게 설명하기', '활동 나열 X. 왜 그 방법을 선택했는지, 어떤 기준으로 비교·행동했는지.'],
+  ['04 배운 점과 변화 보여주기', '처음의 어려움이나 판단 → 실제 행동 → 달라진 생각·행동을 연결.'],
+  ['05 나의 판단을 분명히', '책이나 친구 의견을 전달만 하지 말고, 어떤 근거에 설득됐고 무엇을 놓쳤는지 내 말로.'],
+  ['06 자기 언어 사용하기', '국가주권·인권 같은 용어는 필요할 때만, 뜻을 스스로 설명할 수 있게. 완성 답안 통째로 외우지 않기.'],
+  ['07 짧고 정확하게', '6분에 6문항 + 꼬리질문. 기본 답변은 20~30초. 꼬리질문에는 새로 물은 내용만.'],
+  ['08 모를 때는 솔직하게', '이해 못 하면 다시 물어도 돼요. 확인하지 않은 사실이나 경험을 지어내지 않기.'],
+];
+const FIVE = ['질문에 대한 답부터 말하자.', '내가 실제로 한 일을 근거로 설명하자.', '왜 그렇게 생각하고 행동했는지 말하자.',
+              '무엇을 배우고 어떻게 달라졌는지 보여주자.', '외운 답이 아니라 내 말로 이야기하자.'];
+const SELF_CHECKS = ['첫 문장에서 결론을 말했다', '내가 실제로 한 일을 근거로 들었다', '왜·어떻게를 설명했다', '배운 점·변화로 마무리했다'];
+const INTERVIEWERS = [['👩‍🏫', '면접관 1'], ['🧑‍💼', '면접관 2'], ['👨‍🏫', '면접관 3']];
+const MOCK_SECONDS = 360;
+
+// ── 프로미스나인 (2025년 이후 5인: ASND) — 역사 퀘스트 앱과 같은 포카 체계 ──
+const MEMBERS = [
+  ['hy', '송하영', '하영', '#ff7eb3'],
+  ['jw', '박지원', '지원', '#ff9f43'],
+  ['ng', '이나경', '나경', '#4dabf7'],
+  ['cy', '이채영', '채영', '#9775fa'],
+  ['jh', '백지헌', '지헌', '#20c997'],
+];
+const SETS = [['To Heart', '💌'], ['LOVE BOMB', '💣'], ['FUN!', '🎡'], ['WE GO', '🚀'], ['DM', '📱'], ['Supersonic', '⚡']];
+const STARS_PER_TICKET = 10;
+const ALL_PHOTOCARDS = MEMBERS.flatMap((m) => SETS.map((s, i) => `${m[0]}-${i}`));
+// 사진은 역사 퀘스트 앱과 같은 저장소(같은 주소의 IndexedDB)를 함께 씀
+const PHOTO_DB = 'history-quest';
+const ADMIN_PIN = '5258';
+function checkPin(input) { return String(input) === ADMIN_PIN; }
+
+// ── 순수 로직 ──
+function shuffle(arr, rnd = Math.random) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// 모의면접 6문항: 자기주도 2 · 지원동기 2 · 인성 1 · 마지막 1(마무리)
+// 각 문항에 꼬리질문 하나를 붙일지(약 60%) 정함
+function pickMock(rnd = Math.random) {
+  const [S, M, C] = ['self', 'motive', 'char'].map((t) => shuffle(QUESTIONS.filter((q) => q.type === t), rnd));
+  const list = [...S.slice(0, 2), ...M.slice(0, 2), ...C.slice(0, 1)];
+  const rest = shuffle([...S.slice(2), ...M.slice(2), ...C.slice(1)], rnd);
+  const main = shuffle(list, rnd);
+  main.push(rnd() < 0.5 ? QUESTIONS.find((q) => q.type === 'end') : rest[0]);
+  return main.map((q) => ({ q, tail: q.tails.length && rnd() < 0.6 ? q.tails[Math.floor(rnd() * q.tails.length)] : null }));
+}
+
+// 답변 길이 판정: 20초 미만 short, 20~40초 good, 40초 넘으면 long
+function timeZone(sec) { return sec < 20 ? 'short' : sec <= 40 ? 'good' : 'long'; }
+function fmtTime(sec) { sec = Math.max(0, Math.floor(sec)); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; }
+
+function parseDay(s) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || '');
+  return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+}
+function dayKey(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+// 면접까지 남은 날 (오늘이면 0, 지났으면 음수), 날짜 없으면 null
+function ddays(dateStr, today = new Date()) {
+  const d = parseDay(dateStr);
+  if (!d) return null;
+  const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return Math.round((d - t) / 86400000);
+}
+function ddayLabel(n) { return n === null ? '📅 면접 날짜를 정해요' : n > 0 ? `D-${n}` : n === 0 ? 'D-DAY 🔥' : `D+${-n}`; }
+// 연속 연습일: 오늘(또는 어제)까지 이어진 날 수
+function streak(days, today = new Date()) {
+  const set = new Set(days);
+  const d = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  if (!set.has(dayKey(d))) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while (set.has(dayKey(d))) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+
+function addStars(wallet, n) {
+  let stars = (wallet.stars || 0) + n, tickets = wallet.tickets || 0;
+  while (stars >= STARS_PER_TICKET) { stars -= STARS_PER_TICKET; tickets++; }
+  return { stars, tickets };
+}
+function drawPhotocard(owned, bias, rnd = Math.random) {
+  const left = ALL_PHOTOCARDS.filter((k) => !owned.includes(k));
+  if (!left.length) return null;
+  const fav = left.filter((k) => k.startsWith(bias + '-'));
+  const pool = fav.length && rnd() < 0.5 ? fav : left;
+  return pool[Math.floor(rnd() * pool.length)];
+}
+// 셀프 체크 개수에 따른 별: 3개 이상 2개, 그 외 1개
+function starsForCheck(n) { return n >= 3 ? 2 : 1; }
+
+function loadState(raw) {
+  const def = { bias: null, stars: 0, tickets: 0, owned: [], done: {}, memo: {}, days: [], mocks: 0, quick: 0, date: '', voice: true };
+  try {
+    const s = JSON.parse(raw);
+    if (!s || typeof s !== 'object') return def;
+    const ids = new Set(QUESTIONS.map((q) => q.id));
+    const done = {}, memo = {};
+    for (const [k, v] of Object.entries(s.done || {})) if (ids.has(k) && Number.isFinite(v)) done[k] = v;
+    for (const [k, v] of Object.entries(s.memo || {})) if (ids.has(k) && typeof v === 'string') memo[k] = v.slice(0, 2000);
+    return {
+      bias: MEMBERS.some((m) => m[0] === s.bias) ? s.bias : null,
+      stars: Number.isFinite(s.stars) ? s.stars : 0,
+      tickets: Number.isFinite(s.tickets) ? s.tickets : 0,
+      owned: Array.isArray(s.owned) ? s.owned.filter((k) => ALL_PHOTOCARDS.includes(k)) : [],
+      done, memo,
+      days: Array.isArray(s.days) ? s.days.filter((d) => parseDay(d)).slice(-400) : [],
+      mocks: Number.isFinite(s.mocks) ? s.mocks : 0,
+      quick: Number.isFinite(s.quick) ? s.quick : 0,
+      date: parseDay(s.date) ? s.date : '',
+      voice: s.voice !== false,
+    };
+  } catch {
+    return def;
+  }
+}
+
+// 포카 그림 (SVG). photo: 기기에 저장한 사진 주소(blob:)
+let svgSeq = 0;
+function photocardSVG(key, locked, photo) {
+  const gid = `g${key}-${++svgSeq}`;
+  if (photo && !/^(blob:|data:image\/)/.test(photo)) photo = null;
+  const [mid, si] = key.split('-');
+  const m = MEMBERS.find((x) => x[0] === mid);
+  const [set, icon] = SETS[+si];
+  const c = locked ? '#d9cfe0' : m[3];
+  const no = String(ALL_PHOTOCARDS.indexOf(key) + 1).padStart(2, '0');
+  const sparkle = (x, y, r) => `<path d="M${x} ${y - r} L${x + r * 0.3} ${y - r * 0.3} L${x + r} ${y} L${x + r * 0.3} ${y + r * 0.3} L${x} ${y + r} L${x - r * 0.3} ${y + r * 0.3} L${x - r} ${y} L${x - r * 0.3} ${y - r * 0.3}Z" fill="#fff" opacity=".9"/>`;
+  if (!locked && photo) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
+  <rect width="200" height="300" rx="16" fill="${c}"/>
+  <clipPath id="c${gid}"><rect x="8" y="8" width="184" height="284" rx="12"/></clipPath>
+  <image href="${photo}" x="8" y="8" width="184" height="284" preserveAspectRatio="xMidYMid slice" clip-path="url(#c${gid})"/>
+  <rect x="8" y="232" width="184" height="60" fill="${c}" opacity=".88" clip-path="url(#c${gid})"/>
+  <rect x="8" y="8" width="184" height="284" rx="12" fill="none" stroke="#fff" stroke-width="4"/>
+  <text x="100" y="32" text-anchor="middle" font-size="14" font-weight="900" fill="#fff" stroke="${c}" stroke-width="4" paint-order="stroke">${icon} ${set}</text>
+  <text x="100" y="260" text-anchor="middle" font-size="19" font-weight="900" fill="#fff">♡ ${m[1]} ♡</text>
+  <text x="100" y="281" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" opacity=".9">fromis_9 · No.${no}</text>
+</svg>`;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
+  <defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="${locked ? '#efe9f3' : '#f6f0ff'}"/></linearGradient></defs>
+  <rect width="200" height="300" rx="16" fill="url(#${gid})"/>
+  <rect x="8" y="8" width="184" height="284" rx="12" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="${locked ? '6 6' : '0'}"/>
+  ${locked ? `<text x="100" y="170" text-anchor="middle" font-size="90" font-weight="900" fill="#fff">?</text>
+  ${photo ? `<text x="100" y="215" text-anchor="middle" font-size="15" font-weight="800" fill="#8a7397">📷 사진 대기 중</text>` : ''}
+  <text x="100" y="262" text-anchor="middle" font-size="15" font-weight="800" fill="#a493b3">${set}</text>` : `
+  <circle cx="100" cy="128" r="62" fill="#fff" opacity=".35"/>
+  ${sparkle(40, 60, 12)}${sparkle(162, 92, 9)}${sparkle(150, 200, 7)}${sparkle(46, 190, 8)}
+  <text x="100" y="40" text-anchor="middle" font-size="16" font-weight="900" fill="#fff">${icon} ${set}</text>
+  <text x="100" y="146" text-anchor="middle" font-size="46" font-weight="900" fill="#fff" stroke="${c}" stroke-width="6" stroke-linejoin="round" paint-order="stroke">${m[2]}</text>
+  <text x="100" y="236" text-anchor="middle" font-size="17" font-weight="800" fill="${c}">♡ ${m[1]} ♡</text>
+  <text x="100" y="262" text-anchor="middle" font-size="13" font-weight="800" fill="${c}" opacity=".85">fromis_9 · No.${no}</text>`}
+</svg>`;
+}
+
+// ── 화면 ──
+if (typeof document !== 'undefined') main();
+
+function main() {
+  const $ = (id) => document.getElementById(id);
+  $('version').textContent = 'v' + APP_VERSION;
+  document.addEventListener('contextmenu', (e) => { if (!/TEXTAREA|INPUT/.test(e.target.tagName)) e.preventDefault(); });
+
+  let state = loadState(localStorage.getItem(STORE_KEY));
+  const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {} };
+  const bias = () => MEMBERS.find((m) => m[0] === state.bias) || MEMBERS[3];
+  const markDay = () => { const k = dayKey(new Date()); if (!state.days.includes(k)) state.days.push(k); };
+
+  function applyTheme() {
+    const c = bias()[3];
+    const r = document.documentElement.style;
+    r.setProperty('--mem', c);
+    r.setProperty('--mem-soft', c + '22');
+    r.setProperty('--mem-deep', `color-mix(in srgb, ${c} 70%, #2e2340)`);
+    document.querySelector('meta[name=theme-color]').setAttribute('content', c);
+  }
+  let toastT = 0;
+  function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+  let ac = null;
+  function beep(kind) {
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      const notes = kind === 'ok' ? [784, 1047] : kind === 'win' ? [659, 784, 988, 1319] : kind === 'card' ? [523, 659, 784, 1047, 1319] : kind === 'tick' ? [880] : [220, 180];
+      notes.forEach((f, i) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = kind === 'ng' ? 'sawtooth' : 'sine';
+        o.frequency.value = f;
+        const t = ac.currentTime + i * 0.08;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.18, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+        o.connect(g).connect(ac.destination); o.start(t); o.stop(t + 0.22);
+      });
+    } catch {}
+  }
+  function giveStars(n) {
+    const before = state.tickets;
+    Object.assign(state, addStars(state, n));
+    if (state.tickets > before) { toast(`🎟 포카 뽑기권 획득! (${bias()[2]} 확률 UP)`); beep('win'); }
+    else toast(`⭐ +${n}`);
+  }
+
+  // 질문 읽어주기 (한국어 음성)
+  let koVoice = null;
+  function pickVoice() {
+    const vs = speechSynthesis.getVoices();
+    koVoice = vs.find((v) => v.lang === 'ko-KR') || vs.find((v) => v.lang && v.lang.startsWith('ko')) || null;
+  }
+  if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function speak(text) {
+    return new Promise((res) => {
+      if (!state.voice || !('speechSynthesis' in window)) return res();
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'ko-KR'; if (koVoice) u.voice = koVoice; u.rate = 1;
+      u.onend = res; u.onerror = res;
+      speechSynthesis.speak(u);
+      setTimeout(res, 15000);
+    });
+  }
+
+  // 녹음
+  let stream = null, rec = null, chunks = [];
+  async function startRec() {
+    try {
+      if (!stream) stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      chunks = [];
+      rec = new MediaRecorder(stream);
+      rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+      rec.start();
+      return true;
+    } catch {
+      toast('🎙 마이크를 쓸 수 없어요. 타이머만 사용해요');
+      rec = null;
+      return false;
+    }
+  }
+  function stopRec() {
+    return new Promise((res) => {
+      if (!rec || rec.state === 'inactive') return res(null);
+      rec.onstop = () => res(new Blob(chunks, { type: rec.mimeType || 'audio/webm' }));
+      rec.stop();
+    });
+  }
+  function releaseMic() {
+    if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; }
+  }
+
+  // 화면 전환
+  const screens = ['bias', 'home', 'list', 'practice', 'mock', 'quick', 'tips', 'binder', 'admin'];
+  function show(name) {
+    for (const s of screens) $(s).hidden = s !== name;
+    scrollTo(0, 0);
+    if (name === 'home') renderHome();
+  }
+  document.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('click', () => { save(); stopAll(); show('home'); }));
+  function stopAll() {
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    clearInterval(pTick); clearInterval(mTick); clearInterval(qkTick);
+    if (rec && rec.state !== 'inactive') rec.stop();
+    releaseMic();
+  }
+
+  // 최애
+  function renderBias() {
+    const g = $('biasGrid'); g.innerHTML = '';
+    for (const m of MEMBERS) {
+      const b = document.createElement('button');
+      b.className = 'bias-btn' + (state.bias === m[0] ? ' on' : '');
+      b.innerHTML = photocardSVG(`${m[0]}-0`, false, photos.get(`${m[0]}-0`)) + `<b>${m[1]}</b>`;
+      b.addEventListener('click', () => { state.bias = m[0]; save(); applyTheme(); toast(`💖 최애: ${m[2]}! 같이 면접 준비해요`); show('home'); });
+      g.appendChild(b);
+    }
+    $('biasBack').hidden = !state.bias;
+  }
+  $('biasBtn').addEventListener('click', () => { renderBias(); show('bias'); });
+
+  // 홈
+  function renderHome() {
+    const m = bias();
+    const mine = state.owned.filter((k) => k.startsWith(m[0] + '-'));
+    const heroKey = mine.find((k) => photos.has(k)) || mine[0] || `${m[0]}-0`;
+    $('heroCard').innerHTML = photocardSVG(heroKey, false, mine.includes(heroKey) ? photos.get(heroKey) : null);
+    $('ddayText').textContent = ddayLabel(ddays(state.date));
+    const st = streak(state.days);
+    $('streakText').textContent = st ? `🔥 ${st}일 연속 연습 중 · 💖 최애 ${m[2]}` : `💖 최애 ${m[2]} · 오늘 연습을 시작해요!`;
+    $('starText').textContent = `⭐ ${state.stars} / ${STARS_PER_TICKET}`;
+    $('ticketText').textContent = `🎟 뽑기권 ${state.tickets}장`;
+    $('starBar').style.width = (state.stars / STARS_PER_TICKET * 100) + '%';
+    const full = state.owned.length >= ALL_PHOTOCARDS.length;
+    $('drawBtn').disabled = state.tickets < 1 || full;
+    $('drawBtn').textContent = full ? '👑 컴플리트!' : `🎁 포카 뽑기 (${state.tickets})`;
+    $('binderBtn').textContent = `📒 바인더 ${state.owned.length}/${ALL_PHOTOCARDS.length}`;
+    const done = QUESTIONS.filter((q) => state.done[q.id]).length;
+    $('doneText').textContent = `연습한 질문 ${done} / ${QUESTIONS.length}`;
+    $('mockText').textContent = `🎤 모의면접 ${state.mocks}회`;
+    $('doneBar').style.width = (done / QUESTIONS.length * 100) + '%';
+    $('voiceBtn').textContent = state.voice ? '🔊 질문 읽어주기 켜짐' : '🔇 질문 읽어주기 꺼짐';
+  }
+  $('voiceBtn').addEventListener('click', () => { state.voice = !state.voice; save(); renderHome(); });
+  $('dateBtn').addEventListener('click', () => { $('dateInput').value = state.date || ''; $('dateModal').hidden = false; });
+  $('dateClose').addEventListener('click', () => { $('dateModal').hidden = true; });
+  $('dateSave').addEventListener('click', () => {
+    const v = $('dateInput').value;
+    state.date = parseDay(v) ? v : ''; save();
+    $('dateModal').hidden = true; renderHome();
+  });
+  document.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => {
+    const go = b.dataset.go;
+    if (go === 'list') { renderList(); show('list'); }
+    else if (go === 'mock') startMock();
+    else if (go === 'quick') startQuick();
+    else if (go === 'tips') { renderTips(); show('tips'); }
+  }));
+
+  // ── 질문 목록 ──
+  function renderList() {
+    const box = $('qGroups'); box.innerHTML = '';
+    $('listCount').textContent = `✔ ${QUESTIONS.filter((q) => state.done[q.id]).length} / ${QUESTIONS.length}`;
+    for (const [t, [tname, icon]] of Object.entries(TYPES)) {
+      const g = document.createElement('div');
+      g.className = 'panel qgroup';
+      g.innerHTML = `<h3></h3><div class="qlist"></div>`;
+      g.querySelector('h3').textContent = `${icon} ${tname}`;
+      const list = g.querySelector('.qlist');
+      for (const q of QUESTIONS.filter((x) => x.type === t)) {
+        const b = document.createElement('button');
+        b.className = 'qitem';
+        const n = state.done[q.id] || 0;
+        b.innerHTML = `<span class="n"></span><small>${n ? `✔ ${n}회` : ''}${state.memo[q.id] ? ' ✍️' : ''}</small>`;
+        b.querySelector('.n').textContent = q.q;
+        b.addEventListener('click', () => openPractice(q.id));
+        list.appendChild(b);
+      }
+      box.appendChild(g);
+    }
+  }
+
+  // ── 질문 연습 ──
+  let pq = null, pTick = 0, pStart = 0, pRecOn = false, pChecks = [], pUrl = null;
+  function openPractice(id) {
+    stopAll();
+    pq = QUESTIONS.find((q) => q.id === id);
+    pChecks = SELF_CHECKS.map(() => false);
+    $('pTitle').textContent = `${TYPES[pq.type][1]} ${TYPES[pq.type][0]}`;
+    $('pTag').textContent = `${TYPES[pq.type][0]} · 질문 ${QUESTIONS.indexOf(pq) + 1}`;
+    $('pQ').textContent = pq.q;
+    $('pTimer').textContent = '0:00'; $('pTimer').className = 'timer short';
+    $('pRec').classList.remove('on'); $('pRec').textContent = '🎙';
+    $('pRecHint').textContent = '버튼을 누르고 말해 보세요';
+    $('pAudio').hidden = true; if (pUrl) URL.revokeObjectURL(pUrl); pUrl = null;
+    $('pInfo').hidden = true; $('pReveal').hidden = false;
+    $('pKeys').innerHTML = ''; pq.keys.forEach((k) => { const s = document.createElement('span'); s.textContent = k; $('pKeys').appendChild(s); });
+    const sk = $('pSkel'); sk.innerHTML = '';
+    [['핵심', pq.core], ['근거', pq.ev], ['변화', pq.ch]].filter((x) => x[1]).forEach(([a, b]) => {
+      const d = document.createElement('div'); d.innerHTML = '<b></b><span></span>';
+      d.querySelector('b').textContent = a; d.querySelector('span').textContent = b; sk.appendChild(d);
+    });
+    if (pq.example) {
+      const d = document.createElement('div'); d.innerHTML = '<b>가이드 예시</b><span></span>';
+      d.querySelector('span').textContent = pq.example; sk.appendChild(d);
+    }
+    const tl = $('pTails'); tl.innerHTML = '';
+    (pq.tails.length ? pq.tails : ['(꼬리질문 없이 짧게 마무리)']).forEach((t) => { const li = document.createElement('li'); li.textContent = t; tl.appendChild(li); });
+    $('pNote').hidden = !pq.note; $('pNote').textContent = pq.note ? '⚠️ ' + pq.note : '';
+    $('pMemo').value = state.memo[pq.id] || '';
+    renderChecks();
+    show('practice');
+    speak(pq.q);
+  }
+  function renderChecks() {
+    const box = $('pChecks'); box.innerHTML = '';
+    SELF_CHECKS.forEach((c, i) => {
+      const b = document.createElement('button');
+      b.className = 'ck' + (pChecks[i] ? ' on' : '');
+      b.innerHTML = `<i>${pChecks[i] ? '✓' : ''}</i><span></span>`;
+      b.querySelector('span').textContent = c;
+      b.addEventListener('click', () => { pChecks[i] = !pChecks[i]; renderChecks(); });
+      box.appendChild(b);
+    });
+  }
+  $('pSpeak').addEventListener('click', () => speak(pq.q));
+  $('pRec').addEventListener('click', async () => {
+    if (!pRecOn) {
+      if ('speechSynthesis' in window) speechSynthesis.cancel();
+      const ok = await startRec();
+      pRecOn = true; pStart = Date.now();
+      $('pRec').classList.add('on'); $('pRec').textContent = '⏹';
+      $('pRecHint').textContent = ok ? '말하는 중… 다 말하면 ⏹' : '타이머만 돌아가요… 다 말하면 ⏹';
+      $('pAudio').hidden = true;
+      clearInterval(pTick);
+      pTick = setInterval(() => {
+        const s = (Date.now() - pStart) / 1000;
+        $('pTimer').textContent = fmtTime(s); $('pTimer').className = 'timer ' + timeZone(s);
+      }, 250);
+    } else {
+      pRecOn = false; clearInterval(pTick);
+      const sec = (Date.now() - pStart) / 1000;
+      const blob = await stopRec();
+      $('pRec').classList.remove('on'); $('pRec').textContent = '🎙';
+      const z = timeZone(sec);
+      $('pRecHint').textContent = `${fmtTime(sec)} · ` + (z === 'good' ? '👍 딱 좋은 길이!' : z === 'long' ? '⏱ 조금 길어요. 핵심만!' : '조금 짧아요. 근거를 하나 더!');
+      if (blob) { if (pUrl) URL.revokeObjectURL(pUrl); pUrl = URL.createObjectURL(blob); $('pAudio').src = pUrl; $('pAudio').hidden = false; }
+    }
+  });
+  $('pReveal').addEventListener('click', () => { $('pInfo').hidden = false; $('pReveal').hidden = true; });
+  $('pMemo').addEventListener('input', () => { state.memo[pq.id] = $('pMemo').value; save(); });
+  $('pDone').addEventListener('click', () => {
+    const n = pChecks.filter(Boolean).length;
+    if (!n) { toast('스스로 체크해 보고 눌러요!'); return; }
+    state.done[pq.id] = (state.done[pq.id] || 0) + 1;
+    markDay(); giveStars(starsForCheck(n)); save();
+    beep('ok');
+    pChecks = SELF_CHECKS.map(() => false); renderChecks();
+  });
+  $('pNext').addEventListener('click', () => {
+    const i = QUESTIONS.indexOf(pq);
+    openPractice(QUESTIONS[(i + 1) % QUESTIONS.length].id);
+  });
+  $('practiceBack').addEventListener('click', () => { stopAll(); renderList(); show('list'); });
+
+  // ── 모의면접 ──
+  let mList = [], mi = 0, mTail = false, mTick = 0, mClockStart = 0, mAnsStart = 0, mRecOn = false, mRes = [], mIv = 0;
+  function renderIvs() {
+    const box = $('mIvs'); box.innerHTML = '';
+    INTERVIEWERS.forEach(([e, n], i) => {
+      const d = document.createElement('div');
+      d.className = 'iv' + (i === mIv ? ' on' : '');
+      d.innerHTML = `<span>${e}</span>${n}`;
+      box.appendChild(d);
+    });
+  }
+  function startMock() {
+    stopAll();
+    mList = pickMock(); mi = 0; mTail = false; mRes = [];
+    $('mPlay').hidden = false; $('mDone').hidden = true;
+    show('mock');
+    mClockStart = Date.now();
+    clearInterval(mTick);
+    mTick = setInterval(tickMock, 250);
+    askMock();
+  }
+  function curText() { return mTail ? mList[mi].tail : mList[mi].q.q; }
+  async function askMock() {
+    const item = mList[mi];
+    mIv = mTail ? mIv : Math.floor(Math.random() * 3);
+    renderIvs();
+    $('mTag').textContent = mTail ? '↪ 꼬리질문' : `${mi + 1} / ${mList.length} · ${TYPES[item.q.type][0]}`;
+    $('mQ').textContent = curText();
+    $('mStep').textContent = `${INTERVIEWERS[mIv][1]}의 질문`;
+    $('mTimer').textContent = '0:00'; $('mTimer').className = 'timer short';
+    $('mRec').classList.remove('on'); $('mRec').textContent = '🎙';
+    $('mHint').textContent = '질문을 들은 뒤 마이크를 누르고 답해요';
+    mRecOn = false;
+    await speak(curText());
+    if (!$('mock').hidden && !mRecOn) $('mHint').textContent = '🎙 버튼을 누르고 답하세요 (질문한 면접관을 보며!)';
+  }
+  function tickMock() {
+    const left = MOCK_SECONDS - (Date.now() - mClockStart) / 1000;
+    $('mClock').textContent = left > 0 ? `⏱ ${fmtTime(left)}` : '⏱ 시간 종료';
+    $('mClock').style.color = left < 60 ? 'var(--bad)' : '';
+    if (mRecOn) {
+      const s = (Date.now() - mAnsStart) / 1000;
+      $('mTimer').textContent = fmtTime(s); $('mTimer').className = 'timer ' + timeZone(s);
+    }
+  }
+  async function mStartAnswer() {
+    if (mRecOn) return;
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    await startRec();
+    mRecOn = true; mAnsStart = Date.now();
+    $('mRec').classList.add('on'); $('mRec').textContent = '⏹';
+    $('mHint').textContent = '답하는 중… 끝나면 "답변 끝 ▶"';
+  }
+  $('mRec').addEventListener('click', () => { if (mRecOn) finishAnswer(); else mStartAnswer(); });
+  $('mNext').addEventListener('click', finishAnswer);
+  async function finishAnswer() {
+    const sec = mRecOn ? (Date.now() - mAnsStart) / 1000 : 0;
+    const blob = mRecOn ? await stopRec() : null;
+    mRecOn = false;
+    mRes.push({ text: curText(), tail: mTail, type: mList[mi].q.type, sec, url: blob ? URL.createObjectURL(blob) : null });
+    const timeUp = (Date.now() - mClockStart) / 1000 >= MOCK_SECONDS;
+    if (!mTail && mList[mi].tail && !timeUp) { mTail = true; askMock(); return; }
+    mTail = false; mi++;
+    if (mi < mList.length && !timeUp) askMock(); else mockDone(timeUp);
+  }
+  function mockDone(timeUp) {
+    clearInterval(mTick);
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    releaseMic();
+    const total = (Date.now() - mClockStart) / 1000;
+    const answered = mRes.filter((r) => !r.tail && r.sec >= 5).length; // 5초 이상 답한 기본 문항
+    const full = answered >= mList.length;
+    state.mocks++; markDay();
+    if (full) giveStars(5); else if (answered >= 3) giveStars(2);
+    save();
+    $('mPlay').hidden = true; $('mDone').hidden = false;
+    const good = mRes.filter((r) => timeZone(r.sec) === 'good').length;
+    $('mSummary').textContent = `${fmtTime(total)} 동안 기본 ${answered}/${mList.length}문항 · 꼬리 ${mRes.filter((r) => r.tail && r.sec >= 5).length}개 답변` +
+      ` · 딱 좋은 길이 ${good}개` + (timeUp ? ' · 6분 종료' : '') + (full ? ' · ⭐+5' : '');
+    const box = $('mRes'); box.innerHTML = '';
+    mRes.forEach((r, i) => {
+      const d = document.createElement('div');
+      d.className = 'panel item';
+      const z = timeZone(r.sec);
+      d.innerHTML = `<span class="tag"></span><b></b><span class="dur ${z}"></span>`;
+      d.querySelector('.tag').textContent = r.tail ? '↪ 꼬리질문' : TYPES[r.type][0];
+      d.querySelector('b').textContent = r.text;
+      d.querySelector('.dur').textContent = r.sec ? `${fmtTime(r.sec)} · ${z === 'good' ? '👍 좋아요' : z === 'long' ? '⏱ 길어요' : '조금 짧아요'}` : '답변 안 함';
+      if (r.url) { const a = document.createElement('audio'); a.controls = true; a.src = r.url; d.appendChild(a); }
+      box.appendChild(d);
+    });
+    $('mFive').innerHTML = FIVE.map((f) => `<li>${f}</li>`).join('');
+    beep('win');
+  }
+  $('mAgain').addEventListener('click', startMock);
+  $('mockBack').addEventListener('click', () => {
+    if (!$('mPlay').hidden && !confirm('모의면접을 그만할까요?')) return;
+    stopAll(); show('home');
+  });
+
+  // ── 첫 문장 훈련 ──
+  let qkQ = null, qkTick = 0, qkSession = 0;
+  function startQuick() {
+    stopAll(); qkSession = 0;
+    $('qkCount').textContent = `${state.quick}개`;
+    nextQuick();
+    show('quick');
+  }
+  function nextQuick() {
+    const pool = QUESTIONS.filter((q) => q !== qkQ);
+    qkQ = pool[Math.floor(Math.random() * pool.length)];
+    $('qkTag').textContent = TYPES[qkQ.type][0];
+    $('qkQ').textContent = qkQ.q;
+    $('qkPhase').textContent = '준비되면 시작!';
+    $('qkCountdown').textContent = '';
+    $('qkAns').hidden = true; $('qkStart').hidden = false;
+  }
+  function countdown(sec, label, done) {
+    let n = sec;
+    $('qkPhase').textContent = label; $('qkCountdown').textContent = n;
+    clearInterval(qkTick);
+    qkTick = setInterval(() => {
+      n--;
+      if (n > 0) { $('qkCountdown').textContent = n; beep('tick'); }
+      else { clearInterval(qkTick); done(); }
+    }, 1000);
+  }
+  $('qkStart').addEventListener('click', async () => {
+    $('qkStart').hidden = true;
+    await speak(qkQ.q);
+    countdown(5, '🤔 생각해요 (5초)', () => {
+      beep('ok');
+      countdown(8, '🗣 지금! 결론 한 문장 말하기', () => {
+        $('qkPhase').textContent = '어땠나요?';
+        $('qkCountdown').textContent = '';
+        $('qkCore').textContent = qkQ.core;
+        const k = $('qkKeys'); k.innerHTML = '';
+        qkQ.keys.forEach((x) => { const s = document.createElement('span'); s.textContent = x; k.appendChild(s); });
+        $('qkAns').hidden = false;
+      });
+    });
+  });
+  $('qkGood').addEventListener('click', () => {
+    state.quick++; qkSession++; markDay(); giveStars(1); save();
+    $('qkCount').textContent = `${state.quick}개`;
+    nextQuick();
+  });
+  $('qkAgain').addEventListener('click', () => { $('qkAns').hidden = true; $('qkStart').hidden = false; $('qkPhase').textContent = '한 번 더!'; });
+  $('quickBack').addEventListener('click', () => { stopAll(); show('home'); });
+
+  // ── 원칙 ──
+  function renderTips() {
+    const box = $('tipList'); box.innerHTML = '';
+    for (const [t, d] of PRINCIPLES) {
+      const p = document.createElement('div'); p.className = 'panel tip';
+      p.innerHTML = '<b></b><p></p>';
+      p.querySelector('b').textContent = t; p.querySelector('p').textContent = d;
+      box.appendChild(p);
+    }
+    $('tipFive').innerHTML = FIVE.map((f) => `<li>${f}</li>`).join('');
+  }
+
+  // ── 포카 뽑기·바인더 ──
+  function doDraw() {
+    if (state.tickets < 1) { $('drawModal').hidden = true; return; }
+    const key = drawPhotocard(state.owned, bias()[0]);
+    if (!key) { toast('👑 포카 컴플리트!'); return; }
+    state.tickets--; state.owned.push(key); save();
+    const m = MEMBERS.find((x) => x[0] === key.split('-')[0]);
+    const el = $('drawCard');
+    el.classList.remove('spin'); void el.offsetWidth;
+    el.innerHTML = photocardSVG(key, false, photos.get(key));
+    el.classList.add('spin');
+    $('drawTitle').textContent = key.startsWith(bias()[0] + '-') ? '💖 최애 포카 획득! 💖' : '✨ 새 포카 획득! ✨';
+    $('drawText').textContent = `${m[1]} · ${SETS[+key.split('-')[1]][0]} (${state.owned.length}/${ALL_PHOTOCARDS.length})`;
+    $('drawAgain').disabled = state.tickets < 1 || state.owned.length >= ALL_PHOTOCARDS.length;
+    $('drawAgain').textContent = `한 장 더! (🎟 ${state.tickets})`;
+    $('drawModal').hidden = false;
+    beep('card');
+  }
+  $('drawBtn').addEventListener('click', doDraw);
+  $('drawAgain').addEventListener('click', doDraw);
+  $('drawClose').addEventListener('click', () => { $('drawModal').hidden = true; renderHome(); });
+  $('binderBtn').addEventListener('click', () => { renderBinder(); show('binder'); });
+  function renderBinder() {
+    $('binderCount').textContent = `${state.owned.length} / ${ALL_PHOTOCARDS.length}`;
+    const box = $('binderList'); box.innerHTML = '';
+    for (const m of [bias(), ...MEMBERS.filter((x) => x !== bias())]) {
+      const row = document.createElement('div');
+      row.className = 'panel brow';
+      const have = SETS.filter((s, i) => state.owned.includes(`${m[0]}-${i}`)).length;
+      row.innerHTML = `<h3><i style="background:${m[3]}"></i><span></span></h3><div class="bcards"></div>`;
+      row.querySelector('h3 span').textContent = `${m[1]} ${have}/${SETS.length}${m === bias() ? ' 💖' : ''}`;
+      const cs = row.querySelector('.bcards');
+      SETS.forEach((s, i) => {
+        const key = `${m[0]}-${i}`;
+        const b = document.createElement('button');
+        b.innerHTML = photocardSVG(key, !state.owned.includes(key), photos.get(key));
+        cs.appendChild(b);
+      });
+      box.appendChild(row);
+    }
+  }
+
+  // ── 사진 (역사 퀘스트와 공유하는 IndexedDB) ──
+  const photos = new Map();
+  function db() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open(PHOTO_DB, 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('photos');
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+  }
+  async function dbDo(mode, fn) {
+    const d = await db();
+    return new Promise((res, rej) => {
+      const tx = d.transaction('photos', mode);
+      fn(tx.objectStore('photos'));
+      tx.oncomplete = () => res();
+      tx.onerror = () => rej(tx.error);
+    });
+  }
+  async function loadPhotos() {
+    try {
+      const d = await db();
+      await new Promise((res) => {
+        const req = d.transaction('photos').objectStore('photos').openCursor();
+        req.onsuccess = () => {
+          const cur = req.result;
+          if (!cur) return res();
+          photos.set(cur.key, URL.createObjectURL(cur.value));
+          cur.continue();
+        };
+        req.onerror = () => res();
+      });
+    } catch {}
+  }
+  async function toCardImage(file) {
+    const img = await createImageBitmap(file);
+    const W = 480, H = 720;
+    const sc = Math.max(W / img.width, H / img.height);
+    const w = img.width * sc, h = img.height * sc;
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    cv.getContext('2d').drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+    return new Promise((res) => cv.toBlob(res, 'image/jpeg', 0.85));
+  }
+
+  // ── 관리자 ──
+  let pin = '';
+  function renderPin(bad) {
+    [...$('pinDots').children].forEach((d, i) => d.classList.toggle('on', i < pin.length));
+    if (bad) { const el = $('pinDots'); el.classList.remove('bad'); void el.offsetWidth; el.classList.add('bad'); }
+  }
+  ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].forEach((k) => {
+    const b = document.createElement('button');
+    b.textContent = k;
+    if (!k) { b.disabled = true; b.style.visibility = 'hidden'; }
+    b.addEventListener('click', () => {
+      if (k === '⌫') pin = pin.slice(0, -1);
+      else if (pin.length < 4) pin += k;
+      renderPin(false);
+      if (pin.length === 4) {
+        if (checkPin(pin)) { pin = ''; renderPin(false); $('pinModal').hidden = true; renderAdmin(); show('admin'); }
+        else { pin = ''; renderPin(true); beep('ng'); }
+      }
+    });
+    $('pinPad').appendChild(b);
+  });
+  $('adminBtn').addEventListener('click', () => { pin = ''; renderPin(false); $('pinModal').hidden = false; });
+  $('pinClose').addEventListener('click', () => { $('pinModal').hidden = true; });
+  function renderAdmin() {
+    $('adminCount').textContent = `📷 ${photos.size} / ${ALL_PHOTOCARDS.length}`;
+    const box = $('adminList'); box.innerHTML = '';
+    for (const m of MEMBERS) {
+      const row = document.createElement('div');
+      row.className = 'panel brow';
+      const n = SETS.filter((s, i) => photos.has(`${m[0]}-${i}`)).length;
+      row.innerHTML = `<h3><i style="background:${m[3]}"></i><span></span></h3><div class="bcards"></div>`;
+      row.querySelector('h3 span').textContent = `${m[1]} · 사진 ${n}/${SETS.length}`;
+      const cs = row.querySelector('.bcards');
+      SETS.forEach((s, i) => {
+        const key = `${m[0]}-${i}`;
+        const b = document.createElement('button');
+        b.innerHTML = photocardSVG(key, false, photos.get(key)) + `<span class="badge">${state.owned.includes(key) ? '뽑음' : '안 뽑음'}</span>`;
+        b.addEventListener('click', () => openPhoto(key));
+        cs.appendChild(b);
+      });
+      box.appendChild(row);
+    }
+  }
+  let photoKey = null;
+  function openPhoto(key) {
+    photoKey = key;
+    const m = MEMBERS.find((x) => x[0] === key.split('-')[0]);
+    $('photoCard').innerHTML = photocardSVG(key, false, photos.get(key));
+    $('photoTitle').textContent = `📷 ${m[2]} · ${SETS[+key.split('-')[1]][0]}`;
+    $('photoText').textContent = state.owned.includes(key)
+      ? '용건이가 이미 뽑은 카드예요. 사진을 넣으면 바로 바뀌어요. (역사 퀘스트에도 반영)'
+      : '용건이가 아직 안 뽑은 카드예요. 뽑으면 이 사진으로 나와요. (역사 퀘스트에도 반영)';
+    $('photoDel').hidden = !photos.has(key);
+    $('photoModal').hidden = false;
+  }
+  $('photoInput').addEventListener('change', async (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f || !photoKey) return;
+    try {
+      const blob = await toCardImage(f);
+      await dbDo('readwrite', (st) => st.put(blob, photoKey));
+      if (photos.has(photoKey)) URL.revokeObjectURL(photos.get(photoKey));
+      photos.set(photoKey, URL.createObjectURL(blob));
+      toast('📷 사진을 넣었어요!');
+      openPhoto(photoKey); renderAdmin();
+    } catch { toast('사진을 넣지 못했어요. 다른 사진으로 해 볼까요?'); }
+  });
+  $('photoDel').addEventListener('click', async () => {
+    if (!photoKey) return;
+    try { await dbDo('readwrite', (st) => st.delete(photoKey)); } catch {}
+    if (photos.has(photoKey)) URL.revokeObjectURL(photos.get(photoKey));
+    photos.delete(photoKey);
+    openPhoto(photoKey); renderAdmin();
+  });
+  $('photoClose').addEventListener('click', () => { $('photoModal').hidden = true; });
+
+  applyTheme();
+  loadPhotos().then(() => { if (!state.bias) renderBias(); else if (!$('home').hidden) renderHome(); });
+  if (state.bias) show('home'); else { renderBias(); show('bias'); }
+
+  let deferred = null;
+  addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; $('install').hidden = false; });
+  $('install').addEventListener('click', async () => {
+    if (!deferred) return;
+    deferred.prompt(); await deferred.userChoice; deferred = null; $('install').hidden = true;
+  });
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js');
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloaded || !navigator.serviceWorker.controller) return;
+      reloaded = true; location.reload();
+    });
+  }
+}
+</script>
+</body>
+</html>

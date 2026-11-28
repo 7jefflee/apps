@@ -1,0 +1,33 @@
+{
+  "name": "면접 스테이지",
+  "short_name": "면접 스테이지",
+  "description": "대일외고 독일어과 면접 연습 — 예상 질문·녹음·모의면접 + 프로미스나인 포카",
+  "lang": "ko",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3e8ff",
+  "theme_color": "#c9b6ff",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
