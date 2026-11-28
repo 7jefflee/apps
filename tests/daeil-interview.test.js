@@ -87,3 +87,13 @@ test('저장 데이터 복구', () => {
   assert.equal(s.date, '2026-12-05');
   assert.equal(s.voice, false);
 });
+
+test('핵심 6문항: 평가 요소 포함, 모의면접에서 순서대로', () => {
+  const core = QUESTIONS.filter((q) => q.type === 'core');
+  assert.equal(core.length, 6);
+  for (const q of core) assert.ok(q.aim && q.keys.length && q.tails.length, q.id);
+  const m = app('pickMock')(seeded(4), 'core');
+  assert.equal(json(m.map((x) => x.q.id)), json(['k1', 'k2', 'k3', 'k4', 'k5', 'k6']));
+  // 랜덤 모의면접에는 핵심 문항이 섞이지 않음
+  for (let s = 1; s <= 20; s++) assert.ok(app('pickMock')(seeded(s)).every((x) => x.q.type !== 'core'));
+});

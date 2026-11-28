@@ -389,6 +389,14 @@
     <div class="row"><button class="ghost" id="photoDel">🗑 사진 빼기</button><button class="ghost" id="photoClose">닫기</button></div>
   </div>
 </div>
+<div class="modal" id="mockModal" hidden>
+  <div class="box">
+    <h2>🎤 어떤 질문으로 볼까요?</h2>
+    <button id="mockCore">⭐ 핵심 6문항 (현진 예상)</button>
+    <button class="white" id="mockRandom">🎲 랜덤 6문항 (전체 질문에서)</button>
+    <button class="ghost" id="mockClose">닫기</button>
+  </div>
+</div>
 <div class="modal" id="dateModal" hidden>
   <div class="box">
     <h2>📅 면접 날짜</h2>
@@ -401,18 +409,60 @@
 
 <script>
 const APP_NAME = '면접 스테이지';
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 const STORE_KEY = 'daeil-interview:v1';
 
 // ── 면접 질문 은행 (용건이 자기소개서 1~3번 + 답변 가이드 기반) ──
 const TYPES = {
+  core: ['핵심 6문항 (현진 예상)', '⭐'],
   self: ['자기주도학습', '📚'],
   motive: ['지원동기·진로', '🎯'],
   char: ['인성', '🤝'],
   end: ['마무리', '🎤'],
 };
-// core: 첫 문장 예시 / ev: 근거 / ch: 변화·배운 점 / note: 주의·확인할 점
+// core: 첫 문장 예시 / ev: 근거 / ch: 변화·배운 점 / note: 주의·확인할 점 / aim: 평가 요소
 const QUESTIONS = [
+  // ⭐ 핵심 6문항 (현진이가 만든 예상 질문, 평가 요소 포함)
+  { id: 'k1', type: 'core', aim: '자기주도성', q: '영어 학습에서 어려움을 스스로 어떻게 해결했나요?',
+    keys: ['안 들리는 가사', '내 목소리 녹음 → 원곡과 비교', '문맥으로 짐작 → 영영사전 확인', '스스로 해결하는 재미'],
+    core: '팝송 가사가 잘 들리지 않았을 때, 제 목소리를 녹음해 원곡과 비교하는 방법으로 해결했습니다.',
+    ev: '틀린 부분을 여러 번 확인하며 다시 따라 했고, 기사를 읽을 때는 모르는 표현을 문맥으로 짐작한 뒤 영영사전으로 확인했습니다.',
+    ch: '처음엔 안 들리던 소리가 들리면서, 모르는 것을 직접 해결하는 공부에 재미를 느꼈습니다.',
+    tails: ['왜 녹음해서 비교하는 방법을 골랐나요?', '그래도 해결되지 않은 어려움은 없었나요?', '그 방법을 다른 과목에도 써 본 적이 있나요?'] },
+  { id: 'k2', type: 'core', aim: '탐구 방법·판단 기준', q: '여러 영문 기사의 사실과 평가를 어떤 기준으로 구분했나요?',
+    keys: ['여러 매체에 공통으로 나오는 내용', '확인할 수 있는 내용(누가·언제·무엇)', '기자의 판단·추측 표현', '매체마다 다른 강조점'],
+    core: '여러 매체에 공통으로 나오고 확인할 수 있는 내용은 사실로, 기자의 판단이 들어간 표현은 평가로 보았습니다.',
+    ev: '같은 사건을 다룬 기사를 여러 개 읽으며 공통된 내용과 매체마다 다르게 강조한 내용을 나눠 정리했습니다.',
+    ch: '그 뒤로는 기사를 읽을 때 사실과 의견을 먼저 나눠 보고 제 판단을 정리하게 되었습니다.',
+    tails: ['구분한 예를 하나 들어 보세요.', '여러 매체에 똑같이 나와도 사실이 아닐 수 있지 않나요?', '구분하기 어려웠던 문장은 어떻게 했나요?'],
+    note: '자소서에는 "구분해 보려고 했다"까지만 있어요. 기준은 용건이가 실제로 쓴 것만 말하기! 키워드는 예시이니, 내 기준을 메모 칸에 적어 두세요.' },
+  { id: 'k3', type: 'core', aim: '성찰·성장 가능성', q: '아체주 공개 태형에 관한 생각은 왜, 어떻게 달라졌나요?',
+    keys: ['처음엔 종교·문화 존중', '토론에서 친구들 의견', '처벌받는 사람의 입장을 놓침', '문화 존중 ≠ 고통 주는 처벌 인정'],
+    core: '처벌받는 사람의 입장을 충분히 생각하지 못했다는 것을 깨달았기 때문에 생각이 달라졌습니다.',
+    ev: '국어 시간 토론에서 친구들이 인권 침해라는 의견을 냈고, 이후 국제 인권 기준을 찾아보았습니다.',
+    ch: '문화를 존중하는 것과 고통을 주는 처벌까지 인정하는 것은 다르다고 생각하게 됐고, 우리 기준만으로 쉽게 판단해서도 안 된다고 느꼈습니다.',
+    tails: ['친구 말을 듣고 생각을 바꾼 것은 줏대가 없는 것 아닌가요?', '앞으로 생각이 또 바뀔 수도 있을까요?', '국제 인권 기준은 어떤 것을 찾아봤나요?'] },
+  { id: 'k4', type: 'core', aim: '지원동기·역량', q: '왜 대일외고 독일어과이며, 진로에 어떤 도움이 될까요?',
+    keys: ['영문 기사로 다른 사회 탐구 → 독일어로 넓히기', '영어권 시각만이 아니라', '여러 입장 이해·근거로 설명', '사회적 약자를 돕는 변호사'],
+    core: '영문 기사로 다른 사회의 문제를 알아본 경험을 독일어로 넓히고 싶어서 지원했고, 여러 입장을 이해해야 하는 변호사의 꿈에 도움이 된다고 생각합니다.',
+    ev: '같은 사건도 매체마다 강조점이 달랐던 경험 때문에, 다른 언어권의 시각도 직접 확인하고 싶어졌습니다.',
+    ch: '여러 입장을 이해하고 근거를 들어 설명하는 능력은 사회적 약자를 돕는 변호사에게 꼭 필요하다고 생각합니다.',
+    tails: ['왜 영어과가 아니라 독일어과인가요?', '독일어가 변호사 일에 직접 쓰일까요?', '독일어권 사회에서 관심 있는 문제가 있나요?'],
+    note: '질문이 두 부분(왜 독일어과 + 진로에 어떤 도움)이에요. 둘 다 한 문장씩 꼭 답하기.' },
+  { id: 'k5', type: 'core', aim: '계획의 구체성·현실성', q: '대일외고에서 구체적으로 무엇을 탐구하고 어떻게 실천할 건가요?',
+    keys: ['먼저: 수업·FOZ로 표현 익히기', '영어↔독일어 표현 비교 게시판', '시사토론반: 사회적 약자의 권리', '익숙해지면: 독일어권·영어권 기사 비교'],
+    core: '같은 사회 문제를 독일어권과 영어권 기사가 어떻게 다르게 다루는지 비교해 보는 것이 목표입니다.',
+    ev: '먼저 수업과 FOZ에서 표현을 익히고 영어 표현에 맞는 독일어 표현을 찾아 게시판에서 친구들과 비교하겠습니다. 시사토론반에서는 사회적 약자의 권리를 주제로 토론하겠습니다.',
+    ch: '독일어가 익숙해지면 두 언어권의 기사를 직접 비교해, 사회 문제를 여러 시각으로 보는 힘을 키우겠습니다.',
+    tails: ['독일어를 처음 배우는데 기사 비교가 가능할까요?', '계획대로 되지 않으면 어떻게 하겠어요?', '어떤 주제부터 비교해 보고 싶나요?'],
+    note: '현실성이 핵심! "처음부터 독일어 기사 비교"가 아니라 단계(표현 익히기 → 토론 → 기사 비교)로 말하기.' },
+  { id: 'k6', type: 'core', aim: '협업·책임감', q: '영화 제작에서 어떤 역할을 했고, 공동체에 대한 생각이 어떻게 바뀌었나요?',
+    keys: ['조감독', '혼자 남은 감독 → 편집 돕기', '시간 맞추고 역할 나누기', '각자 할 일을 찾도록 돕기'],
+    core: '조감독을 맡았고, 공동체에서는 제 일만 끝내는 것이 아니라 함께 완성하도록 돕는 것도 책임이라는 생각으로 바뀌었습니다.',
+    ev: '친구들이 먼저 떠나 작업이 멈출 뻔했을 때 배운 편집 방법으로 감독을 돕자 친구들도 하나둘 남았고, 시간을 맞춰 역할을 나눠 영화를 끝까지 완성했습니다.',
+    ch: '그 뒤 모둠 활동에서도 제 일을 마친 뒤 전체 진행을 살피고, 어려운 친구를 먼저 돕게 되었습니다.',
+    tails: ['먼저 간 친구들에게 서운하지 않았나요?', '조감독으로서 가장 어려웠던 점은 무엇인가요?', '공동체에서 가장 중요한 것 한 가지를 꼽는다면?'] },
+
   // ① 자기주도학습
   { id: 's1', type: 'self', q: '자기주도적으로 공부한 경험 중 가장 기억에 남는 것을 말해 보세요.',
     keys: ['팝송 받아쓰기', '내 목소리 녹음 → 원곡과 비교', '들리지 않던 소리', '스스로 해결하는 재미'],
@@ -605,15 +655,18 @@ function shuffle(arr, rnd = Math.random) {
   return a;
 }
 
-// 모의면접 6문항: 자기주도 2 · 지원동기 2 · 인성 1 · 마지막 1(마무리)
+// 모의면접 6문항. set='core': 핵심 6문항을 순서대로
+// 랜덤: 자기주도 2 · 지원동기 2 · 인성 1 · 마지막 1(마무리)
 // 각 문항에 꼬리질문 하나를 붙일지(약 60%) 정함
-function pickMock(rnd = Math.random) {
+function pickMock(rnd = Math.random, set = 'random') {
+  const withTail = (q) => ({ q, tail: q.tails.length && rnd() < 0.6 ? q.tails[Math.floor(rnd() * q.tails.length)] : null });
+  if (set === 'core') return QUESTIONS.filter((q) => q.type === 'core').map(withTail);
   const [S, M, C] = ['self', 'motive', 'char'].map((t) => shuffle(QUESTIONS.filter((q) => q.type === t), rnd));
   const list = [...S.slice(0, 2), ...M.slice(0, 2), ...C.slice(0, 1)];
   const rest = shuffle([...S.slice(2), ...M.slice(2), ...C.slice(1)], rnd);
   const main = shuffle(list, rnd);
   main.push(rnd() < 0.5 ? QUESTIONS.find((q) => q.type === 'end') : rest[0]);
-  return main.map((q) => ({ q, tail: q.tails.length && rnd() < 0.6 ? q.tails[Math.floor(rnd() * q.tails.length)] : null }));
+  return main.map(withTail);
 }
 
 // 답변 길이 판정: 20초 미만 short, 20~40초 good, 40초 넘으면 long
@@ -632,7 +685,7 @@ function ddays(dateStr, today = new Date()) {
   const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   return Math.round((d - t) / 86400000);
 }
-function ddayLabel(n) { return n === null ? '📅 면접 날짜를 정해요' : n > 0 ? `D-${n}` : n === 0 ? 'D-DAY 🔥' : `D+${-n}`; }
+function ddayLabel(n) { return n === null ? 'D-?' : n > 0 ? `D-${n}` : n === 0 ? 'D-DAY 🔥' : `D+${-n}`; }
 // 연속 연습일: 오늘(또는 어제)까지 이어진 날 수
 function streak(days, today = new Date()) {
   const set = new Set(days);
@@ -857,7 +910,8 @@ function main() {
     $('heroCard').innerHTML = photocardSVG(heroKey, false, mine.includes(heroKey) ? photos.get(heroKey) : null);
     $('ddayText').textContent = ddayLabel(ddays(state.date));
     const st = streak(state.days);
-    $('streakText').textContent = st ? `🔥 ${st}일 연속 연습 중 · 💖 최애 ${m[2]}` : `💖 최애 ${m[2]} · 오늘 연습을 시작해요!`;
+    $('streakText').textContent = (state.date ? '' : '📅 아래 "면접 날짜"를 정해 주세요 · ') +
+      (st ? `🔥 ${st}일 연속 연습 중 · 💖 최애 ${m[2]}` : `💖 최애 ${m[2]} · 오늘 연습을 시작해요!`);
     $('starText').textContent = `⭐ ${state.stars} / ${STARS_PER_TICKET}`;
     $('ticketText').textContent = `🎟 뽑기권 ${state.tickets}장`;
     $('starBar').style.width = (state.stars / STARS_PER_TICKET * 100) + '%';
@@ -882,7 +936,7 @@ function main() {
   document.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => {
     const go = b.dataset.go;
     if (go === 'list') { renderList(); show('list'); }
-    else if (go === 'mock') startMock();
+    else if (go === 'mock') $('mockModal').hidden = false;
     else if (go === 'quick') startQuick();
     else if (go === 'tips') { renderTips(); show('tips'); }
   }));
@@ -917,7 +971,7 @@ function main() {
     pq = QUESTIONS.find((q) => q.id === id);
     pChecks = SELF_CHECKS.map(() => false);
     $('pTitle').textContent = `${TYPES[pq.type][1]} ${TYPES[pq.type][0]}`;
-    $('pTag').textContent = `${TYPES[pq.type][0]} · 질문 ${QUESTIONS.indexOf(pq) + 1}`;
+    $('pTag').textContent = pq.aim ? `⭐ 핵심 ${pq.id.slice(1)} · 평가 요소: ${pq.aim}` : `${TYPES[pq.type][0]} · 질문 ${QUESTIONS.indexOf(pq) + 1}`;
     $('pQ').textContent = pq.q;
     $('pTimer').textContent = '0:00'; $('pTimer').className = 'timer short';
     $('pRec').classList.remove('on'); $('pRec').textContent = '🎙';
@@ -1004,9 +1058,13 @@ function main() {
       box.appendChild(d);
     });
   }
+  let mSet = 'core';
+  $('mockCore').addEventListener('click', () => { mSet = 'core'; $('mockModal').hidden = true; startMock(); });
+  $('mockRandom').addEventListener('click', () => { mSet = 'random'; $('mockModal').hidden = true; startMock(); });
+  $('mockClose').addEventListener('click', () => { $('mockModal').hidden = true; });
   function startMock() {
     stopAll();
-    mList = pickMock(); mi = 0; mTail = false; mRes = [];
+    mList = pickMock(Math.random, mSet); mi = 0; mTail = false; mRes = [];
     $('mPlay').hidden = false; $('mDone').hidden = true;
     show('mock');
     mClockStart = Date.now();
@@ -1019,7 +1077,7 @@ function main() {
     const item = mList[mi];
     mIv = mTail ? mIv : Math.floor(Math.random() * 3);
     renderIvs();
-    $('mTag').textContent = mTail ? '↪ 꼬리질문' : `${mi + 1} / ${mList.length} · ${TYPES[item.q.type][0]}`;
+    $('mTag').textContent = mTail ? '↪ 꼬리질문' : `${mi + 1} / ${mList.length} · ${item.q.aim || TYPES[item.q.type][0]}`;
     $('mQ').textContent = curText();
     $('mStep').textContent = `${INTERVIEWERS[mIv][1]}의 질문`;
     $('mTimer').textContent = '0:00'; $('mTimer').className = 'timer short';
